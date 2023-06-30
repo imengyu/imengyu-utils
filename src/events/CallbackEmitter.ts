@@ -2,7 +2,7 @@
  * 事件回调存储类
  */
 
-import ArrayUtils from "@/ArrayUtils";
+import ArrayUtils from "../ArrayUtils";
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export class CallbackEmitter<T extends Function> {
