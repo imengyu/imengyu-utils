@@ -1,4 +1,3 @@
-const dayjs = require('dayjs');
 const { DataModel, DataConverter } = require('../dist');
 
 DataConverter.configDayJsTimeZone('PRC');
