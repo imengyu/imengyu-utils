@@ -7,9 +7,15 @@ export default {
    * 生成指定范围之内（`[minNum,maxNum]`）的随机数
    * @param minNum 最小值
    * @param maxNum 最大值
+   * @param demicalCount 指定生成的小数位数
    */
-  genRandom(minNum : number, maxNum : number) : number {
-    return Math.floor(Math.random()*(maxNum-minNum+1)+minNum); 
+  genRandom(minNum : number, maxNum : number, demicalCount = 0) : number {
+    if (demicalCount > 0) {
+      minNum *= demicalCount * 10;
+      maxNum *= demicalCount * 10;
+    }
+    const result =  Math.floor(Math.random()*(maxNum-minNum+1)+minNum);
+    return demicalCount > 0 ? result / (demicalCount * 10) : result; 
   },
   /**
    * 生成不重复随机字符串。使用当前日期作为前缀防止重复。
