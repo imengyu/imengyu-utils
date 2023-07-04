@@ -1,6 +1,6 @@
 {
   "name": "@imengyu/imengyu-utils",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "Utils Self use",
   "main": "dist/index.js",
   "scripts": {

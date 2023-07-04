@@ -29,7 +29,24 @@ function clone<T extends object>(obj: T, deepArray = false): T {
   }
   return temp as unknown as T;
 }
-
+/**
+ * 浅克隆一个对象的所有属性至另一个对象上，此函数会更改原有对象（targetObject）
+ * @param srcObject 源对象
+ * @param targetObject 另一个对象
+ */
+function cloneValuesToObject(srcObject: unknown, targetObject: unknown, ignoreKeys?: string[]|undefined, filterKeys?: string[]|undefined) {
+  if (typeof srcObject !== 'object')
+    throw new Error("srcObject not a object!");
+  if (typeof targetObject !== 'object')
+    throw new Error("targetObject not a object!");
+  for (const key in srcObject) {
+    if (filterKeys && !filterKeys.includes(key))
+      continue;
+    if (Object.prototype.hasOwnProperty.call(srcObject, key) && (!ignoreKeys || !ignoreKeys.includes(key))) {
+      (targetObject as Record<string, unknown>)[key] = (srcObject as Record<string, unknown>)[key]; 
+    }
+  }
+}
 /**
  * 对两个对象进行深比较
  * @param obj1 要比较的对象
@@ -204,6 +221,7 @@ function isObjectAllKeyNull(object: Record<string, unknown>) : boolean {
  */
 const ObjectUtils = {
   clone,
+  cloneValuesToObject,
   isDefined,
   isDefinedAndNotNull,
   isObjectAllKeyNull,
