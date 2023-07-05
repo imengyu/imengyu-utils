@@ -1,14 +1,26 @@
 /**
  * 深克隆对象，数组
  * @param obj 要克隆的对象
- * @param deepArray 是否要深度克隆数组里的每个对象
+ * @param cloneConfig 克隆配置
  */
-function clone<T extends object>(obj: T, deepArray = false): T {
+function clone<T extends object>(obj: T, cloneConfig: {
+  /**
+   * 是否要深度克隆数组里的每个对象，默认 true
+   */
+  deepArray?: boolean,
+  /**
+   * 是否克隆函数，默认 true
+   */
+  cloneFunction?: boolean,
+}): T {
+  const deepArray = cloneConfig.deepArray ?? true;
+  const cloneFunction = cloneConfig.cloneFunction ?? true;
   let temp: object|Array<object>|null = null;
+
   if (obj instanceof Array) 
   {
-    if (deepArray)
-      temp = (obj as object[]).map((item) => clone(item, deepArray));
+    if (deepArray ?? true)
+      temp = (obj as object[]).map((item) => clone(item, cloneConfig));
     else
       temp = obj.concat() as Array<object>;
   }
@@ -20,29 +32,55 @@ function clone<T extends object>(obj: T, deepArray = false): T {
     for (const item in obj) {
       const val = _obj[item];
       if (val === null) { _temp[item] = null; }
-      else if (val) { _temp[item] = clone(val, deepArray); }
+      else if (val) { _temp[item] = clone(val, cloneConfig); }
     }
   } 
-  else 
-  {
+  else if (typeof obj === 'function') 
+    return cloneFunction ? obj : undefined as unknown as T;
+  else
     temp = obj as unknown as object;
-  }
   return temp as unknown as T;
 }
 /**
  * 浅克隆一个对象的所有属性至另一个对象上，此函数会更改原有对象（targetObject）
  * @param srcObject 源对象
  * @param targetObject 另一个对象
+ * @param cloneConfig 克隆配置
  */
-function cloneValuesToObject(srcObject: unknown, targetObject: unknown, ignoreKeys?: string[]|undefined, filterKeys?: string[]|undefined) {
+function cloneValuesToObject(
+  srcObject: unknown, 
+  targetObject: unknown, 
+  cloneConfig: { 
+    /**
+     * 忽略指定的键值，在此数组中的键值不会被克隆。
+     * 可以为函数回调，函数参数中传入键值，返回true则键值不会被克隆。
+     */
+    ignoreKeys?: string[]|((key: string) => boolean)|undefined, 
+    /**
+     * 筛选指定的键值，如果为空，则不筛选。
+     * 可以为函数回调，函数参数中传入键值，返回true则键值不会克隆。
+     */
+    filterKeys?: string[]|((key: string) => boolean)|undefined
+  }
+) {
   if (typeof srcObject !== 'object')
     throw new Error("srcObject not a object!");
   if (typeof targetObject !== 'object')
     throw new Error("targetObject not a object!");
   for (const key in srcObject) {
-    if (filterKeys && !filterKeys.includes(key))
-      continue;
-    if (Object.prototype.hasOwnProperty.call(srcObject, key) && (!ignoreKeys || !ignoreKeys.includes(key))) {
+    if (cloneConfig.filterKeys) {
+      if (typeof cloneConfig.filterKeys === 'function' && cloneConfig.filterKeys(key))
+        continue;
+      if (typeof cloneConfig.filterKeys === 'object' && !cloneConfig.filterKeys.includes(key))
+        continue;
+    }
+    if (Object.prototype.hasOwnProperty.call(srcObject, key)) {
+      if (cloneConfig.ignoreKeys) {
+        if (typeof cloneConfig.ignoreKeys === 'function' && !cloneConfig.ignoreKeys(key))
+          continue;
+        if (typeof cloneConfig.ignoreKeys === 'object' && !cloneConfig.ignoreKeys.includes(key))
+          continue;
+      }
       (targetObject as Record<string, unknown>)[key] = (srcObject as Record<string, unknown>)[key]; 
     }
   }
