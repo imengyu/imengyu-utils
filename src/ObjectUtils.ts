@@ -3,7 +3,7 @@
  * @param obj 要克隆的对象
  * @param cloneConfig 克隆配置
  */
-function clone<T extends object>(obj: T, cloneConfig: {
+function clone<T extends object>(obj: T, cloneConfig?: {
   /**
    * 是否要深度克隆数组里的每个对象，默认 true
    */
@@ -13,8 +13,8 @@ function clone<T extends object>(obj: T, cloneConfig: {
    */
   cloneFunction?: boolean,
 }): T {
-  const deepArray = cloneConfig.deepArray ?? true;
-  const cloneFunction = cloneConfig.cloneFunction ?? true;
+  const deepArray = cloneConfig?.deepArray ?? true;
+  const cloneFunction = cloneConfig?.cloneFunction ?? true;
   let temp: object|Array<object>|null = null;
 
   if (obj instanceof Array) 
@@ -50,7 +50,7 @@ function clone<T extends object>(obj: T, cloneConfig: {
 function cloneValuesToObject(
   srcObject: unknown, 
   targetObject: unknown, 
-  cloneConfig: { 
+  cloneConfig?: { 
     /**
      * 忽略指定的键值，在此数组中的键值不会被克隆。
      * 可以为函数回调，函数参数中传入键值，返回true则键值不会被克隆。
@@ -63,22 +63,25 @@ function cloneValuesToObject(
     filterKeys?: string[]|((key: string) => boolean)|undefined
   }
 ) {
+  const filterKeys = cloneConfig?.filterKeys;
+  const ignoreKeys = cloneConfig?.ignoreKeys;
+
   if (typeof srcObject !== 'object')
     throw new Error("srcObject not a object!");
   if (typeof targetObject !== 'object')
     throw new Error("targetObject not a object!");
   for (const key in srcObject) {
-    if (cloneConfig.filterKeys) {
-      if (typeof cloneConfig.filterKeys === 'function' && cloneConfig.filterKeys(key))
+    if (filterKeys) {
+      if (typeof filterKeys === 'function' && filterKeys(key))
         continue;
-      if (typeof cloneConfig.filterKeys === 'object' && !cloneConfig.filterKeys.includes(key))
+      if (typeof filterKeys === 'object' && !filterKeys.includes(key))
         continue;
     }
     if (Object.prototype.hasOwnProperty.call(srcObject, key)) {
-      if (cloneConfig.ignoreKeys) {
-        if (typeof cloneConfig.ignoreKeys === 'function' && !cloneConfig.ignoreKeys(key))
+      if (ignoreKeys) {
+        if (typeof ignoreKeys === 'function' && !ignoreKeys(key))
           continue;
-        if (typeof cloneConfig.ignoreKeys === 'object' && !cloneConfig.ignoreKeys.includes(key))
+        if (typeof ignoreKeys === 'object' && !ignoreKeys.includes(key))
           continue;
       }
       (targetObject as Record<string, unknown>)[key] = (srcObject as Record<string, unknown>)[key]; 
