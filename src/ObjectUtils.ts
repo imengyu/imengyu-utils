@@ -81,7 +81,7 @@ function cloneValuesToObject(
       if (ignoreKeys) {
         if (typeof ignoreKeys === 'function' && !ignoreKeys(key))
           continue;
-        if (typeof ignoreKeys === 'object' && !ignoreKeys.includes(key))
+        if (typeof ignoreKeys === 'object' && ignoreKeys.includes(key))
           continue;
       }
       (targetObject as Record<string, unknown>)[key] = (srcObject as Record<string, unknown>)[key]; 
