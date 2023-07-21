@@ -15,11 +15,10 @@ export class EventEmitter {
    */
   public on(event: string, cb: Function) : this {
     let array = this.listeners.get(event);
-    if (!array) {
+    if (!array)
       array = [];
-      this.listeners.set(event, array);
-    }
     ArrayUtils.addOnce(array, cb);
+    this.listeners.set(event, array);
     return this;
   }
   /**
