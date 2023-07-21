@@ -1,62 +1,89 @@
-/* eslint-disable */
+import { ArrayUtils } from "..";
 
+/**
+ * 简易浏览器端使用的 EventEmitter
+ */
 export class EventEmitter {
-  _listeners: {
-    [index: string]: Array<Function>;
-  } = {};
-  maxListener = 10;
 
-  public constructor(maxListener?: number) {
-    if (maxListener) this.maxListener = maxListener;
-  }
+  private listeners = new Map<string, Function[]>;
 
+  /**
+   * 监听事件
+   * @param event 事件名称
+   * @param cb 回调函数
+   * @returns 
+   */
   public on(event: string, cb: Function) : this {
-    const listeners = this._listeners;
-    if (listeners[event] && listeners[event].length >= this.maxListener) {
-      throw console.error("Max Listener ", this.maxListener);
+    let array = this.listeners.get(event);
+    if (!array) {
+      array = [];
+      this.listeners.set(event, array);
     }
-    if (listeners[event] instanceof Array) {
-      if (listeners[event].indexOf(cb) === -1) {
-        listeners[event].push(cb);
-      }
-    } else {
-      listeners[event] = new Array<Function>().concat(cb);
-    }
+    ArrayUtils.addOnce(array, cb);
     return this;
   }
+  /**
+   * 触发事件
+   * @param event 事件名称
+   * @param a 事件参数
+   * @returns 
+   */
   public emit(event: string, ...a: any[]) : this {
-    const listeners = this._listeners;
     const args = Array.prototype.slice.call(arguments);
+    const array = this.listeners.get(event);
     args.shift();
-    if (listeners[event] instanceof Array) {
-      this._listeners[event].forEach(cb => {
+    if (array) {
+      array.forEach(cb => {
         cb.apply(null, args);
       });
     }
     return this;
   }
-  public off(event: string, listener: Function) {
-    const _listeners = this._listeners;
-    const arr = _listeners[event] || [];
-    const i = arr.indexOf(listener);
-    if (i >= 0) {
-      _listeners[event].splice(i, 1);
+  /**
+   * 取消监听事件
+   * @param event 事件名称
+   * @param listener 监听器，如果为空，则移除全部监听器
+   */
+  public off(event: string, listener?: Function|undefined) {
+    if (!listener) {
+      this.clear(event);
+      return;
     }
+    const array = this.listeners.get(event);
+    if (array)
+      ArrayUtils.remove(array, listener);
   }
+  /**
+   * 监听一次事件
+   * @param event 事件名
+   * @param listener 监听器
+   * @returns 
+   */
   public once(event: string, listener: Function) : this {
-    var self = this;
-    function fn() {
-      var args = Array.prototype.slice.call(arguments);
+    const self = this;
+
+    function handler() {
+      const args = Array.prototype.slice.call(arguments);
       listener.apply(null, args);
-      self.once(event, fn);
+      self.off(event, handler);
     }
-    this.on(event, fn);
+
+    this.on(event, handler);
     return this;
   }
+  /**
+   * 清除指定事件监听器
+   * @param event 事件名
+   */
   public clear(event: string) {
-    this._listeners[event] = [];
+    this.listeners.delete(event);
   }
-  public listeners(event: string) {
-    return this._listeners[event];
+  /**
+   * 获取事件监听器
+   * @param event 
+   * @returns 
+   */
+  public get(event: string) {
+    return this.listeners.get(event);
   }
 }
