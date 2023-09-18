@@ -6,6 +6,7 @@ import { ArrayUtils } from "..";
 export class EventEmitter {
 
   private listeners = new Map<string, Function[]>;
+  private anyHandler : ((event: string, args: any[]) => any) |null = null;
 
   /**
    * 监听事件
@@ -22,6 +23,15 @@ export class EventEmitter {
     return this;
   }
   /**
+   * 监听全部事件。
+   * 此回调只能设置一个，设置后，其他通过 on 函数设置的监听器无效。
+   * @returns 
+   */
+  public any(cb: (event: string, args: any[]) => any) : this {
+    this.anyHandler = cb;
+    return this;
+  }
+  /**
    * 触发事件
    * @param event 事件名称
    * @param a 事件参数
@@ -29,6 +39,12 @@ export class EventEmitter {
    */
   public emit(event: string, ...a: any[]) : this {
     const args = Array.prototype.slice.call(arguments);
+
+    if (this.anyHandler) {
+      this.anyHandler(event, args);
+      return this;
+    }
+
     const array = this.listeners.get(event);
     args.shift();
     if (array) {
@@ -37,6 +53,28 @@ export class EventEmitter {
       });
     }
     return this;
+  }
+  /**
+   * 触发异步事件，并获取返回值
+   * @param event 事件名称
+   * @param a 事件参数
+   * @returns 如果有多个事件监听器，则返回包含所有事件监听器返回值的数组。如果只有一个事件监听器，返回此监听器返回值。
+   */
+  public async emitAsync(event: string, ...a: any[]) : Promise<any> {
+    const args = Array.prototype.slice.call(arguments);
+
+    if (this.anyHandler)
+      return await this.anyHandler(event, args);
+
+    const array = this.listeners.get(event);
+    args.shift();
+    if (array) {
+      let result : any[] = [];
+      for (const cb of array) 
+        result.push(await cb.apply(null, args));
+      return result.length === 1 ? result[0] : result;
+    }
+    return undefined;
   }
   /**
    * 取消监听事件
