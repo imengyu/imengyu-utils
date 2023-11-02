@@ -258,10 +258,29 @@ function isObjectAllKeyNull(object: Record<string, unknown>) : boolean {
 }
 
 /**
+ * 从源对象中拷贝目标对象没有的字段数据
+ * @param dist 目标对象
+ * @param src 源对象
+ * @param recursive 是否递归子对象，默认false
+ * @returns 
+ */
+function copyValuesIfUndefined<T extends Record<string, unknown>>(dist: T, src: T, recursive?: boolean) {
+  for (const key in src) {
+    if (typeof dist[key] === 'undefined')
+      dist[key] = src[key];
+    else if (recursive && typeof dist[key] === 'object')
+      copyValuesIfUndefined(dist[key] as any, src[key], recursive);
+  }
+  return dist;
+}
+
+
+/**
  * 对象操作工具函数
  */
 const ObjectUtils = {
   clone,
+  copyValuesIfUndefined,
   cloneValuesToObject,
   isDefined,
   isDefinedAndNotNull,

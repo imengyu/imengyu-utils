@@ -1,3 +1,4 @@
+import ObjectUtils from "./ObjectUtils";
 import StringUtils from "./StringUtils";
 
 let prefix = 'Settings_';
@@ -17,12 +18,16 @@ const SettingsUtils = {
    * 读取设置，如果没有找到设置，则返回默认值
    * @param key 设置的键值
    * @param defaultValue 设置的默认值
+   * @param copyUndefinedFromDefault 当遇到空对象时是否从默认设置拷贝
    */
-  getSettings<T extends Record<string,any>|bigint|number|boolean|Array<unknown>|string>(key : string, defaultValue : T) : T {
+  getSettings<T extends Record<string,any>|bigint|number|boolean|Array<unknown>|string>(key : string, defaultValue : T, copyUndefinedFromDefault = true) : T {
     const set = localStorage.getItem(`${prefix}${key}`);
     if(!set || StringUtils.isNullOrEmpty(set))
       return defaultValue;
-    return JSON.parse(set) as T;
+    let ret = JSON.parse(set) as T;
+    if (copyUndefinedFromDefault && typeof ret === 'object')
+      ret = ObjectUtils.copyValuesIfUndefined(ret as any, defaultValue);
+    return ret;
   },
   /**
    * 设置设置
