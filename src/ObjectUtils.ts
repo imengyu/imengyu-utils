@@ -41,6 +41,23 @@ function clone<T extends object>(obj: T, cloneConfig?: {
     temp = obj as unknown as object;
   return temp as unknown as T;
 }
+
+/**
+ * 递归删除对象所有的 undefined 字段
+ * @param srcObject 
+ * @param recursive 递归？，默认 true
+ */
+function deleteAllUndefined(srcObject: Record<string, unknown>, recursive = true) {
+  for (const key in srcObject) {
+    if (Object.prototype.hasOwnProperty.call(srcObject, key)) {
+      if (srcObject[key] === undefined)
+        delete srcObject[key];
+      else if (recursive && typeof srcObject[key] === 'object')
+        deleteAllUndefined(srcObject);
+    }
+  }
+}
+
 /**
  * 浅克隆一个对象的所有属性至另一个对象上，此函数会更改原有对象（targetObject）
  * @param srcObject 源对象
@@ -79,7 +96,7 @@ function cloneValuesToObject(
     }
     if (Object.prototype.hasOwnProperty.call(srcObject, key)) {
       if (ignoreKeys) {
-        if (typeof ignoreKeys === 'function' && !ignoreKeys(key))
+        if (typeof ignoreKeys === 'function' && ignoreKeys(key))
           continue;
         if (typeof ignoreKeys === 'object' && ignoreKeys.includes(key))
           continue;
@@ -282,6 +299,7 @@ const ObjectUtils = {
   clone,
   copyValuesIfUndefined,
   cloneValuesToObject,
+  deleteAllUndefined,
   isDefined,
   isDefinedAndNotNull,
   isObjectAllKeyNull,
