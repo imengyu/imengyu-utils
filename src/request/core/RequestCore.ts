@@ -5,7 +5,7 @@ import { defaultResponseDataHandler, defaultResponseErrorHandler } from './Reque
 import type { HeaderType, QueryParams, TypeSaveable } from '../utils/AllType';
 import type { KeyValue } from '@imengyu/js-request-transform/dist/DataUtils';
 import type { RequestImplementer } from './RequestImplementer';
-import StringUtils from '@/StringUtils';
+import StringUtils from '../../StringUtils';
 import { PolyfillFormData } from '../implementer/Uniapp';
 
 /**
