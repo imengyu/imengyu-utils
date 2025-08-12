@@ -28,6 +28,11 @@
       "dom",
       "dom.iterable",
       "scripthost"
+    ],
+    "typeRoots": [
+      "node_modules/@dcloudio/types",
+      "node_modules/@uni-helper/uni-app-types",
+      "node_modules/@types"
     ]
   },
   "include": [

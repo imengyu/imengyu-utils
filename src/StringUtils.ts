@@ -57,14 +57,22 @@ const StringUtils = {
   isNullOrEmpty,
   isBase64,
   isNumber,
-  isChinaPoneNumber,
-  isEmail,
+  isStringAllEnglish,
   getCharCount,
+  stringHashCode,
   path,
 }
 
 export default StringUtils;
 
+/**
+ * 检查字符串是否是全英文
+ * @param str 字符串
+ * @returns 
+ */
+function isStringAllEnglish(str: string) {
+  return /^[\x00-\x7F]+$/.test(str)
+}
 /**
  * 字符串判空
  * @param str 字符串
@@ -93,30 +101,15 @@ function isNumber(val : string) : boolean {
   }
 }
 /**
- * 检查字符串是否是中国的11位手机号
- * @param str 字符串
+ * 计算字符串的哈希值
+ * @param {string} str
  */
-function isChinaPoneNumber(str : string) : boolean {
-  const myreg=/^[1][3,4,5,7,8][0-9]{9}$/;
-  if (!myreg.test(str)) {
-      return false;
-  } else {
-      return true;
-  }
+function stringHashCode(str: string) {
+  return '' + (str.split("").reduce(function(a, b) {
+    a = (a << 5) - a + b.charCodeAt(0);
+    return (a & a);
+  }, 0));
 }
-/**
- * 检查字符串是否是邮箱
- * @param str 字符串
- */
-function isEmail(str : string) : boolean {
-  const re=/^\w+((-\w+)|(\.\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/;
-  if (re.test(str) !== true) {
-    return false;
-  }else{
-    return true;
-  }
-}
-
 /**
  * 得到字符串含有某个字符的个数  
  * @param str 字符串

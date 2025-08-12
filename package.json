@@ -19,9 +19,13 @@
   },
   "homepage": "https://github.com/imengyu/imengyu-utils#readme",
   "devDependencies": {
+    "@dcloudio/types": "^3.4.19",
+    "@uni-helper/uni-app-types": "^1.0.0-alpha.6",
     "jest": "^29.3.1",
     "tslib": "^2.6.0",
-    "typescript": "^4.9.4"
+    "typescript": "^5.8.2"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@imengyu/js-request-transform": "^0.3.6"
+  }
 }

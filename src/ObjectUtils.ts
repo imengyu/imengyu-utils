@@ -41,6 +41,28 @@ function clone<T extends object>(obj: T, cloneConfig?: {
     temp = obj as unknown as object;
   return temp as unknown as T;
 }
+/**
+ * 简单克隆一个对象，不递归克隆数组或对象的属性
+ * @param obj 要克隆的对象
+ * @returns 
+ */
+function simpleClone<T>(obj: T) : T {
+  let temp: object|null = null;
+  if (obj instanceof Array) {
+    temp = obj.concat();
+  }
+  else if (typeof obj === 'object') {
+    temp = {};
+    for (const item in obj) {
+      const val = (obj as unknown as Record<string, any>)[item];
+      if (val === null) (temp as Record<string, any>)[item] = null;
+      else (temp as Record<string, any>)[item] = simpleClone(val);
+    }
+  } else {
+    temp = obj as any;
+  }
+  return temp as unknown as T;
+}
 
 /**
  * 递归删除对象所有的 undefined 字段
@@ -297,6 +319,7 @@ function copyValuesIfUndefined<T extends Record<string, unknown>>(dist: T, src: 
  */
 const ObjectUtils = {
   clone,
+  simpleClone,
   copyValuesIfUndefined,
   cloneValuesToObject,
   deleteAllUndefined,

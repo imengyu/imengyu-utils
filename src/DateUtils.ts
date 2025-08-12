@@ -386,6 +386,19 @@ function getDayGap(y: number, m: number, d: number) {
 }
 
 const DateUtils = {
+  FormatStrings: {
+    FullChanese: "YYYY年MM月dd日",
+    MonthChanese: "YYYY年MM月dd日",
+    YearChanese: "YYYY年",
+    CommonDate: "YYYY-MM-dd HH:mm:ss",
+    CommonTime: "HH:mm:ss",
+    ShortDate: "YYYY-MM-dd",
+    ShortTime: "HH:mm",
+    ShortDateTime: "YYYY-MM-dd HH:mm",
+    DateNoDash: "YYYYMMdd",
+    TimeNoDash: "HHmmss",
+    DateTimeNoDash: "YYYYMMddHHmmss",
+  },
   formatDate,
   isVaildDate,
   isSameDay,
