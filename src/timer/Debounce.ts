@@ -23,8 +23,8 @@ export class Debounce {
   execute() {
     if (this.timer > 0)
       return;
-    this.cb();
     this.timer = setTimeout(() => this.timer = 0, this.delay) as any as number;
+    this.cb();
   }
   /**
    * 延迟执行回调函数并启动防抖计时
