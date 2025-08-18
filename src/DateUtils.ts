@@ -63,9 +63,9 @@ function isSameDay(day1: Date, day2: Date): boolean {
 
 /**
  * 获取某年的某月共多少天
- * @param {number} year 
- * @param {number} month
- * @returns {number}
+ * @param year 年
+ * @param month 月，同 Date 中的 getMonth() 方法
+ * @returns 该月的天数
  */
 function getMonthDays(year: number, month: number) {
   switch (month + 1) {
@@ -76,6 +76,7 @@ function getMonthDays(year: number, month: number) {
     case 8:
     case 10:
     case 12:
+    default:
       return 31;
     case 4:
     case 6:
