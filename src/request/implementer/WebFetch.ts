@@ -10,14 +10,20 @@ const fetchImplementer : RequestImplementer = {
     localStorage.setItem(key, JSON.stringify(value));
   },
   doRequest: function (url: string, init?: RequestOptions, timeout?: number): Promise<RequestResponse> {
-    // 创建 AbortController 实例
-    const controller = new AbortController();
-    const { signal } = controller;
 
-    // 设置超时逻辑
-    const timeoutId = setTimeout(() => {
-      controller.abort(); // 超时后取消请求
-    }, timeout);
+    let signal : AbortSignal|undefined;
+    let timeoutId : number|undefined;
+
+    // 创建 AbortController 实例
+    if (window.AbortController) {
+      const controller = new AbortController();
+      signal = controller.signal;
+      // 设置超时逻辑
+      timeoutId = setTimeout(() => {
+        controller.abort(); // 超时后取消请求
+      }, timeout) as any as number;
+    }
+
 
     let body : string|FormData|undefined;
     if (init?.data instanceof FormData)
@@ -35,7 +41,10 @@ const fetchImplementer : RequestImplementer = {
     });
 
     // 请求完成后清除超时
-    response.finally(() => clearTimeout(timeoutId));
+    response.finally(() => {
+      if (timeoutId)
+        clearTimeout(timeoutId);
+    });
     return new Promise<RequestResponse>((resolve, reject) => {
       response.then((res) => {
         resolve(new RequestResponse({
