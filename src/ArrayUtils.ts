@@ -154,6 +154,27 @@ function isContainsNullOrEmpty(arr : Array<unknown>) : boolean {
 }
 
 /**
+ * 检查数组是否相等，长度一致，内部元素一致
+ * @param arr1 数组1
+ * @param arr2 数组2
+ * @returns 
+ */
+function isEqual(arr1 : Array<unknown>, arr2 : Array<unknown>) : boolean {
+  if(!arr1 && !arr2)
+    return true;
+  if(!arr1 || !arr2)
+    return false;
+  if(arr1.length !== arr2.length)
+    return false;
+  for (let i = arr1.length - 1; i >= 0; i--) {
+    if(arr1[i] !== arr2[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
  * 数组工具类
  */
 const ArrayUtils = {
@@ -169,6 +190,7 @@ const ArrayUtils = {
   downData,
   isAllNullOrEmpty,
   isContainsNullOrEmpty,
+  isEqual,
 };
 
 export default ArrayUtils;
