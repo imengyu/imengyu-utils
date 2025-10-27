@@ -359,6 +359,10 @@ export class RequestCoreInstance<T extends DataModel> {
   //发送请求并且处理
   private requestAndResponse<M = T>(url: string, req: RequestOptions, apiName: string, resultModelClass: ModelClassCreatorDefine<M>|undefined, saveCache?: (result: unknown) => void) {
     return new Promise<RequestApiResult<T>>((resolve, reject) => {
+      if (!this.implementer) {
+        reject(new RequestApiError('scriptError', 'This RequestCoreInstance is not configured with request implementer! ', '脚本异常', -1, null, null, req, apiName));
+        return;
+      }
       //发起请求
       this.implementer.doRequest(url, req, this.config.timeout).then((res) => {
         //响应拦截

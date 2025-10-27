@@ -5,7 +5,7 @@ import CookieUtils from './CookieUtils';
 import DateUtils from './DateUtils';
 import FormatUtils from './FormatUtils';
 import HtmlUtils from './HtmlUtils';
-import MathUtis from './MathUtis';
+import MathUtis from './MathUtils';
 import ObjectUtils from './ObjectUtils';
 import RandomUtils from './RandomUtils';
 import SettingsUtils from './SettingsUtils';
@@ -20,6 +20,7 @@ export * from './events/CallbackEmitter';
 export * from './events/EventEmitter';
 export * from './events/EventListener';
 export * from './tools';
+export * from './request';
 export * from './FilePicker';
 
 export {

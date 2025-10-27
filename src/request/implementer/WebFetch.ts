@@ -15,7 +15,7 @@ const fetchImplementer : RequestImplementer = {
     let timeoutId : number|undefined;
 
     // 创建 AbortController 实例
-    if (window.AbortController) {
+    if (globalThis.AbortController) {
       const controller = new AbortController();
       signal = controller.signal;
       // 设置超时逻辑
@@ -23,7 +23,6 @@ const fetchImplementer : RequestImplementer = {
         controller.abort(); // 超时后取消请求
       }, timeout) as any as number;
     }
-
 
     let body : string|FormData|undefined;
     if (init?.data instanceof FormData)

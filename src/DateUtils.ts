@@ -385,6 +385,30 @@ function getDayGap(y: number, m: number, d: number) {
     else return `${-diffDay}天前`;
   }
 }
+/**
+ * 获取今天的 00:00:00 时间
+ * @returns 
+ */
+function getTodayStart() {
+  const date = new Date()
+  const year = date.getFullYear()
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  return new Date(year, month - 1, day, 0, 0, 0)
+}
+/**
+ * 获取今天的 23:59:59 时间
+ * @returns 
+ */
+function getTodayEnd() {
+  const date = new Date()
+  const year = date.getFullYear()
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  return new Date(year, month - 1, day, 23, 59, 59)
+}
+
+
 
 const DateUtils = {
   FormatStrings: {
@@ -403,6 +427,8 @@ const DateUtils = {
   formatDate,
   isVaildDate,
   isSameDay,
+  getTodayStart,
+  getTodayEnd,
   /**
    * 日期加上指定天数
    * @param date 日期
@@ -423,7 +449,7 @@ const DateUtils = {
    * 转换字符串日期为 Date
    * @param dateString 日期字符串
    */
-  parseDate(dateString: string | Date | number, format?: string) {
+  parseDate(dateString: string | Date | number) {
     if (typeof dateString === 'object' && dateString instanceof Date)
       return dateString;
     if (typeof dateString === 'number')
