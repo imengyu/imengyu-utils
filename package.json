@@ -15,6 +15,7 @@
   "license": "MIT",
   "devDependencies": {
     "@dcloudio/types": "^3.4.19",
+    "@dcloudio/uni-app": "^2.0.2-4070620250821001",
     "@uni-helper/uni-app-types": "^1.0.0-alpha.6",
     "jest": "^29.3.1",
     "tslib": "^2.6.0",
