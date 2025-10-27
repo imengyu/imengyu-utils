@@ -58,8 +58,10 @@ const StringUtils = {
   isBase64,
   isNumber,
   isStringAllEnglish,
+  isStringAllChinese,
   getCharCount,
   stringHashCode,
+  cutString,
   path,
 }
 
@@ -121,4 +123,23 @@ function getCharCount(str: string, char: string) : number {
   const result = str.match(regex);          //match方法可在字符串内检索指定的值，或找到一个或多个正则表达式的匹配。
   const count = !result ? 0 : result.length;
   return count;
+}
+/**
+ * 检查字符串是否是全中文
+ * @param str 字符串
+ * @returns 
+ */
+function isStringAllChinese(str: string) {
+  return /^[\u4e00-\u9fa5]+$/.test(str)
+}
+/**
+ * 截取字符串，超出最大长度的部分会被省略号代替
+ * @param str 字符串
+ * @param maxLength 最大长度
+ * @returns 
+ */
+function cutString(str: string, maxLength: number) {
+  if (str.length <= maxLength)
+    return str;
+  return str.substring(0, maxLength) + '...';
 }

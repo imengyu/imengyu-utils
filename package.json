@@ -1,6 +1,6 @@
 {
   "name": "@imengyu/imengyu-utils",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "Utils Self use",
   "main": "dist/index.js",
   "scripts": {
@@ -10,17 +10,9 @@
   "files": [
     "dist"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/imengyu/imengyu-utils.git"
-  },
   "keywords": [],
   "author": "imengyu",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/imengyu/imengyu-utils/issues"
-  },
-  "homepage": "https://github.com/imengyu/imengyu-utils#readme",
   "devDependencies": {
     "@dcloudio/types": "^3.4.19",
     "@uni-helper/uni-app-types": "^1.0.0-alpha.6",
