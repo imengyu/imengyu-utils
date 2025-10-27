@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
-    "target": "ES2015",
-    "module": "CommonJS",
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "jsx": "preserve",
     "importHelpers": true,
     "strict": true,
-    "moduleResolution": "node",
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
