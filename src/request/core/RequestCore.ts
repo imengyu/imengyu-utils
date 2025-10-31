@@ -7,6 +7,7 @@ import type { KeyValue } from '@imengyu/js-request-transform/dist/DataUtils';
 import type { RequestImplementer } from './RequestImplementer';
 import StringUtils from '../../StringUtils';
 import { PolyfillFormData } from '../implementer/Uniapp';
+import LogUtils from '@/LogUtils';
 
 /**
  * API 请求核心
@@ -20,6 +21,8 @@ import { PolyfillFormData } from '../implementer/Uniapp';
  * Copyright (c) 2021 imengyu.top. Licensed under the MIT License.
  * See License.txt in the project root for license information.
  */
+
+const TAG = 'API Debugger';
 
 /**
  * 请求配置体
@@ -325,7 +328,7 @@ export class RequestCoreInstance<T extends DataModel> {
       }
 
       if (RequestApiConfig.getConfig().EnableApiRequestLog)
-        console.log(`[API Debugger] Q > ${apiName} [${req.method || 'GET'}] ` + url, req.data);
+        LogUtils.printLog(TAG, 'message', `Q > ${apiName} [${req.method || 'GET'}] ` + url, req.data);
 
       //缓存处理
       this.solveCache(url, req, cache, (cacheTime, cacheKey, cacheRes) => {
@@ -333,7 +336,7 @@ export class RequestCoreInstance<T extends DataModel> {
         //有缓存数据，则直接返回
         if (cacheRes) {
           if (RequestApiConfig.getConfig().EnableApiRequestLog)
-            console.log(`[API Debugger] C > ${apiName} (${cacheKey}/${cacheTime})`, ( RequestApiConfig.getConfig().EnableApiDataLog ? cacheRes.toString() : ''));
+            LogUtils.printLog(TAG, 'success', `C > ${apiName} (${cacheKey}/${cacheTime})`, ( RequestApiConfig.getConfig().EnableApiDataLog ? cacheRes.toString() : ''));
           resolve(cacheRes as unknown as RequestApiResult<T>);
           return;
         }
@@ -377,12 +380,12 @@ export class RequestCoreInstance<T extends DataModel> {
             //处理数据
             try {
               if (RequestApiConfig.getConfig().EnableApiRequestLog)
-                console.log(`[API Debugger] R > ${apiName} (${res.status}/${result.code})`);
+                LogUtils.printLog(TAG, 'success', `R > ${apiName} (${res.status}/${result.code})`, ( RequestApiConfig.getConfig().EnableApiDataLog ? result.toString() : ''));
               //返回
               resolve(result);
             } catch (e) {
               //捕获处理代码的异常
-              console.error('[API Debugger] E > Catch exception in promise : ' + e + ((e as Error).stack ? ('\n' + (e as Error).stack) : ''));
+              LogUtils.printLog(TAG, 'error', 'E > Catch exception in promise : ' + e + ((e as Error).stack ? ('\n' + (e as Error).stack) : ''));
               reject(new RequestApiError('scriptError', '代码异常，请检查：' + e, '脚本异常', -1, null, e as unknown as KeyValue, req, apiName));
             }
           }).catch((e) => {

@@ -2,6 +2,7 @@ import ApiConfig from "./RequestApiConfig";
 import { DataModel, type NewDataModel } from "@imengyu/js-request-transform";
 import { RequestApiError, type RequestApiErrorType, RequestApiResult } from "./RequestApiResult";
 import { RequestCoreInstance, RequestOptions, RequestResponse } from "./RequestCore";
+import LogUtils from "@/LogUtils";
 
 /**
  * 请求错误与数据处理函数
@@ -17,6 +18,8 @@ import { RequestCoreInstance, RequestOptions, RequestResponse } from "./RequestC
  * See License.txt in the project root for license information.
  */
 
+const TAG = 'API Debugger';
+
 //默认的请求数据处理函数
 export function defaultResponseDataHandler<T extends DataModel>(response: RequestResponse, req: RequestOptions, resultModelClass: NewDataModel|undefined, instance: RequestCoreInstance<T>, apiName: string|undefined) : Promise<RequestApiResult<T>> {
   return new Promise<RequestApiResult<T>>((resolve, reject) => {
@@ -25,13 +28,13 @@ export function defaultResponseDataHandler<T extends DataModel>(response: Reques
       //情况1，有返回数据
       if (response.ok) {
         if (ApiConfig.getConfig().EnableApiRequestLog)
-          console.log(`[API Debugger] Request [${method}] ` + response.url + ' success (' + response.status + ') ' + (ApiConfig.getConfig().EnableApiDataLog ? JSON.stringify(json) : ''));
+          LogUtils.printLog(TAG, 'success', `Request [${method}] ` + response.url + ' success (' + response.status + ') ' + (ApiConfig.getConfig().EnableApiDataLog ? JSON.stringify(json) : ''));
 
         //情况1-1，请求成功，状态码200-299
         resolve(new RequestApiResult(resultModelClass ?? instance.config.modelClassCreator, response.status, json.message, json.data, json));
       } else {
         if (ApiConfig.getConfig().EnableApiRequestLog)
-          console.log(`[API Debugger] Request [${method}] ${response.url} Got error from server : ` + json.message + ' (' + json.code + ') ' + (ApiConfig.getConfig().EnableApiDataLog ? JSON.stringify(json) : ''));
+          LogUtils.printLog(TAG, 'error', `Request [${method}] ${response.url} Got error from server : ` + json.message + ' (' + json.code + ') ' + (ApiConfig.getConfig().EnableApiDataLog ? JSON.stringify(json) : ''));
 
         //情况1-2，请求失败，状态码>299
         const err = new RequestApiError('statusError', json.message, '状态码异常', json.code || response.status, json.data, json, req, apiName, response.url);
@@ -105,9 +108,9 @@ export function defaultResponseDataGetErrorInfo(response: RequestResponse, err: 
 //默认的请求数据处理函数
 export function defaultResponseDataHandlerCatch<T extends DataModel>(method: string, req: RequestOptions, response: RequestResponse, data: any, err: any, apiName: string|undefined, apiUrl: string, reject: (reason?: any) => void, instance: RequestCoreInstance<T>) {
   if (ApiConfig.getConfig().EnableApiRequestLog) {
-    console.log(`[API Debugger] E > ${apiName} ` + err + ' status: ' + response.status);
+    LogUtils.printLog(TAG, 'error', `E > ${apiName} ` + err + ' status: ' + response.status);
     if (err instanceof Error)
-      console.log(err.stack);
+      console.error(err.stack);
   }
 
   
@@ -123,8 +126,8 @@ export function defaultResponseDataHandlerCatch<T extends DataModel>(method: str
 //默认的请求错误处理函数
 export function defaultResponseErrorHandler(err: Error) : RequestApiError {
   if (err instanceof Error)
-    console.error('[API Debugger] Error : ' + err + (err.stack ? ('\n' + err.stack) : ''));
+    LogUtils.printLog(TAG, 'error', 'Error : ' + err + (err.stack ? ('\n' + err.stack) : ''));
   else
-    console.error('[API Debugger] Error : ' + JSON.stringify(err));
+    LogUtils.printLog(TAG, 'error', 'Error : ' + JSON.stringify(err));
   return new RequestApiError('unknow', '' + JSON.stringify(err));
 }
