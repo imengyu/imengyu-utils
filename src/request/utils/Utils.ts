@@ -23,7 +23,7 @@ export function appendGetUrlParams(url: string, key: string, value: any) {
   return url;
 }
 export function appendPostParams(source: any, key: string, value: any) {
-  if (source instanceof FormData && !source.has(key))
+  if (source instanceof globalThis.FormData && !source.has(key))
     source.append(key, value);
   if (source instanceof PolyfillFormData && !source.has(key))
     source.append(key, value);

@@ -48,8 +48,8 @@ export class PolyfillFormData implements Record<string, any> {
   }
 }
 
-if (typeof FormData === 'undefined')
-  global.FormData = PolyfillFormData as any;
+if (typeof globalThis.FormData === 'undefined')
+  globalThis.FormData = PolyfillFormData as any;
 
 const uniappImplementer : RequestImplementer = {
   getCache: function (key: string) {

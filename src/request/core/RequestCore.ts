@@ -318,7 +318,7 @@ export class RequestCoreInstance<T extends DataModel> {
         url = newUrl;
         req = newReq;
       }
-      if (req.data instanceof FormData || req.data instanceof PolyfillFormData) {
+      if (req.data instanceof globalThis.FormData || req.data instanceof PolyfillFormData) {
         req.header['Content-Type'] = 'multipart/form-data';
       } else if (typeof req.data === 'object' || req.data === undefined) {
         req.header['Content-Type'] = 'application/json';
