@@ -303,6 +303,32 @@ function formatList(items: any[], separator: string = ', ', maxItems: number = 0
   
   return displayItems.join(separator) + suffix;
 }
+/**
+ * 格式化经纬度（中文显示，度分秒格式）
+ * @param longitude 经度
+ * @param latitude 纬度
+ * @returns 格式化后的经纬度字符串
+ */
+function formatCoordinates(longitude: number, latitude: number): string {
+  // 格式化经度
+  const longitudeDirection = longitude >= 0 ? '东经' : '西经';
+  const absLongitude = Math.abs(longitude);
+  const longitudeDegrees = Math.floor(absLongitude);
+  const longitudeMinutesDecimal = (absLongitude - longitudeDegrees) * 60;
+  const longitudeMinutes = Math.floor(longitudeMinutesDecimal);
+  const longitudeSeconds = (longitudeMinutesDecimal - longitudeMinutes) * 60;
+  
+  // 格式化纬度
+  const latitudeDirection = latitude >= 0 ? '北纬' : '南纬';
+  const absLatitude = Math.abs(latitude);
+  const latitudeDegrees = Math.floor(absLatitude);
+  const latitudeMinutesDecimal = (absLatitude - latitudeDegrees) * 60;
+  const latitudeMinutes = Math.floor(latitudeMinutesDecimal);
+  const latitudeSeconds = (latitudeMinutesDecimal - latitudeMinutes) * 60;
+  
+  // 格式化输出，保留2位小数
+  return `${longitudeDirection}${longitudeDegrees}°${longitudeMinutes}'${longitudeSeconds.toFixed(2)}" ${latitudeDirection}${latitudeDegrees}°${latitudeMinutes}'${latitudeSeconds.toFixed(2)}"`;
+}
 
 /**
  * 格式化相关工具函数
@@ -325,6 +351,7 @@ const FormatUtils = {
   formatIpAddress,
   formatPriceRange,
   formatList,
+  formatCoordinates,
 };
 
 export default FormatUtils;
