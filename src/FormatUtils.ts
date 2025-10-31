@@ -316,7 +316,7 @@ function formatCoordinates(longitude: number, latitude: number): string {
   const longitudeDegrees = Math.floor(absLongitude);
   const longitudeMinutesDecimal = (absLongitude - longitudeDegrees) * 60;
   const longitudeMinutes = Math.floor(longitudeMinutesDecimal);
-  const longitudeSeconds = (longitudeMinutesDecimal - longitudeMinutes) * 60;
+  const longitudeSeconds = Math.floor((longitudeMinutesDecimal - longitudeMinutes) * 60);
   
   // 格式化纬度
   const latitudeDirection = latitude >= 0 ? '北纬' : '南纬';
@@ -324,10 +324,10 @@ function formatCoordinates(longitude: number, latitude: number): string {
   const latitudeDegrees = Math.floor(absLatitude);
   const latitudeMinutesDecimal = (absLatitude - latitudeDegrees) * 60;
   const latitudeMinutes = Math.floor(latitudeMinutesDecimal);
-  const latitudeSeconds = (latitudeMinutesDecimal - latitudeMinutes) * 60;
+  const latitudeSeconds = Math.floor((latitudeMinutesDecimal - latitudeMinutes) * 60);
   
   // 格式化输出，保留2位小数
-  return `${longitudeDirection}${longitudeDegrees}°${longitudeMinutes}'${longitudeSeconds.toFixed(2)}" ${latitudeDirection}${latitudeDegrees}°${latitudeMinutes}'${latitudeSeconds.toFixed(2)}"`;
+  return `${longitudeDirection}${longitudeDegrees}°${longitudeMinutes}'${longitudeSeconds}" ${latitudeDirection}${latitudeDegrees}°${latitudeMinutes}'${latitudeSeconds}"`;
 }
 
 /**
