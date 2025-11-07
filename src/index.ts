@@ -13,6 +13,7 @@ import StringConv from './StringConv';
 import StringUtils from './StringUtils';
 import TimeUtils from './TimeUtils';
 import LogUtils from './LogUtils';
+import CalendarUtils from './CalendarUtils';
 
 export * from './timer/Debounce';
 export * from './timer/Timer';
@@ -39,6 +40,7 @@ export {
   StringUtils,
   TimeUtils,
   LogUtils,
+  CalendarUtils,
 };
 
 
