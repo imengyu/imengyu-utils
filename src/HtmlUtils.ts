@@ -53,6 +53,7 @@ export default {
   deselectText,
   getSelectionText,
   setSelectionRange,
+  printSpecificElement,
 };
 
 /**
@@ -567,4 +568,40 @@ function getSelectionText() : string {
  */
 function setSelectionRange(element: HTMLInputElement|HTMLTextAreaElement, start: number, end: number) : void {
   element.setSelectionRange(start, end);
+}
+
+function printSpecificElement(element: string, style?: string) {
+    const targetElement = document.querySelector(element); // 获取要打印的元素
+    if (!targetElement) {
+        console.error('目标元素不存在');
+        return;
+    }
+    const styles = document.createElement('style');
+    styles.textContent = style || '';
+    const newDoc = document.createElement('html');
+    newDoc.innerHTML = `
+        <head>${styles.outerHTML}</head>
+        <body>${targetElement.outerHTML}</body>
+    `;
+    const dataUri = 'data:text/html;charset=utf-8,' + encodeURIComponent(newDoc.outerHTML);
+    const newWindow = window.open('', '_blank');
+    if (!newWindow) {
+        console.error('无法打开新窗口');
+        return;
+    }
+    newWindow.document.write(`
+        <html>
+            <head>
+                <script>
+                    window.onload = function() {
+                        window.print();
+                    };
+                </script>
+            </head>
+            <body>
+                <iframe src="${dataUri}" style="width:100%;height:100%;border:0;"></iframe>
+            </body>
+        </html>
+    `);
+    newWindow.document.close();
 }

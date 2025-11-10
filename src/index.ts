@@ -14,6 +14,7 @@ import StringUtils from './StringUtils';
 import TimeUtils from './TimeUtils';
 import LogUtils from './LogUtils';
 import CalendarUtils from './CalendarUtils';
+import DownloadUtils from './DownloadUtils';
 
 export * from './timer/Debounce';
 export * from './timer/Timer';
@@ -41,6 +42,7 @@ export {
   TimeUtils,
   LogUtils,
   CalendarUtils,
+  DownloadUtils,
 };
 
 

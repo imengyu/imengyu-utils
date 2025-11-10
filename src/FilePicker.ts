@@ -287,33 +287,3 @@ export function filterFiles(files: FileList, filterFunc: (file: File) => boolean
   return result;
 }
 
-/**
- * 以指定的名称和内容下载文件
- * @param content 文件内容
- * @param fileName 文件名
- * @param mimeType 文件MIME类型
- */
-export function downloadFile(content: string | Blob | ArrayBuffer, fileName: string, mimeType: string): void {
-  let blob: Blob;
-  
-  if (typeof content === 'string') {
-    blob = new Blob([content], { type: mimeType });
-  } else if (content instanceof ArrayBuffer) {
-    blob = new Blob([content], { type: mimeType });
-  } else {
-    blob = content;
-  }
-  
-  const url = createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = fileName;
-  
-  // 触发下载
-  document.body.appendChild(link);
-  link.click();
-  
-  // 清理
-  document.body.removeChild(link);
-  setTimeout(() => revokeObjectURL(url), 100);
-}
