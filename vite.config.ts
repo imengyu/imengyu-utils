@@ -30,6 +30,6 @@ export default defineConfig({
         }
       }
     },
-    sourcemap: true
+    sourcemap: false
   }
 });
