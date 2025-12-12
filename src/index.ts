@@ -17,6 +17,7 @@ import CalendarUtils from './CalendarUtils';
 import DownloadUtils from './DownloadUtils';
 
 export * from './timer/Debounce';
+export * from './timer/Throttle';
 export * from './timer/Timer';
 export * from './events/CallbackEmitter';
 export * from './events/EventEmitter';

@@ -12,7 +12,7 @@ export class Debounce<P = any> {
    * @param delay 防抖延迟时间(毫秒)
    * @param cb 要执行的回调函数
    */
-  constructor(delay: number, cb: () => void) {
+  constructor(delay: number, cb: (params?: P) => void) {
     this.cb = cb;
     this.delay = delay;
   }

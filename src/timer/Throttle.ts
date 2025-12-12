@@ -13,7 +13,7 @@ export class Throttle<P = any> {
    * @param delay 节流时间间隔(毫秒)
    * @param cb 要执行的回调函数
    */
-  constructor(delay: number, cb: () => void) {
+  constructor(delay: number, cb: (params?: P) => void) {
     this.cb = cb;
     this.delay = delay;
   }
