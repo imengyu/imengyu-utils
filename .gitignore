@@ -2,6 +2,7 @@
 node_modules
 /dist
 dev.config.js
+.npmrc
 
 # local env files
 .env.local
