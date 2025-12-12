@@ -1,6 +1,6 @@
 {
   "name": "@imengyu/imengyu-utils",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "description": "A js/ts Utils",
   "main": "dist/index.umd.js",
   "module": "dist/index.es.js",
