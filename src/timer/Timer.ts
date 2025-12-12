@@ -30,7 +30,9 @@ export class SimpleDelay<T = any> {
   /**
    * 开始延迟计时
    */
-  public start() {
+  public start(data?: T) {
+    if (data)
+      this.data = data;
     if (this.timer)
       clearTimeout(this.timer);
     this.timer = setTimeout(() => 
@@ -76,7 +78,9 @@ export class SimpleTimer<T = any> {
   /**
    * 开始定时器
    */
-  public start() {
+  public start(data?: T) {
+    if (data)
+      this.data = data;
     if (this.timer)
       clearInterval(this.timer);
     this.timer = setInterval(() => {
