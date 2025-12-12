@@ -1,15 +1,16 @@
 /**
- * 防抖器类，用于限制函数在指定时间内的频繁调用
+ * 节流器类，用于限制函数在指定时间内只能执行一次
  */
-export class Debounce<P = any> {
+export class Throttle<P = any> {
 
   private timer = 0;
+  private lastExecuteTime = 0;
   private delay;
-  private cb : (params?: P) => void;
+  private cb: (params?: P) => void;
 
   /**
-   * 创建Debounce实例
-   * @param delay 防抖延迟时间(毫秒)
+   * 创建Throttle实例
+   * @param delay 节流时间间隔(毫秒)
    * @param cb 要执行的回调函数
    */
   constructor(delay: number, cb: () => void) {
@@ -26,24 +27,31 @@ export class Debounce<P = any> {
       this.timer = 0;
     }
   }
+
   /**
-   * 立即执行回调函数并启动防抖计时
+   * 尝试执行回调函数，如果距离上次执行时间超过节流间隔则执行
    */
   execute(params?: P) {
-    if (this.timer > 0)
-      return;
-    this.timer = setTimeout(() => this.timer = 0, this.delay) as any as number;
-    this.cb(params);
+    const now = Date.now();
+    const timeSinceLastExecute = now - this.lastExecuteTime;
+
+    if (timeSinceLastExecute >= this.delay) {
+      this.lastExecuteTime = now;
+      this.cb(params);
+    }
   }
+
   /**
-   * 延迟执行回调函数并启动防抖计时
+   * 延迟执行回调函数，并启动节流计时
    * @param delay 可选的自定义延迟时间(毫秒)，默认使用构造函数中设置的delay
    */
   executeWithDelay(delay = -1, params?: P) {
-    if (this.timer > 0)
+    if (this.timer > 0) {
       return;
-    if (delay <= 0)
+    }
+    if (delay <= 0) {
       delay = this.delay;
+    }
     this.timer = setTimeout(() => {
       this.timer = 0;
       this.execute(params);
