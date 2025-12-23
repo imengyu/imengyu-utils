@@ -84,6 +84,7 @@ const uniappImplementer : RequestImplementer = {
       uni.request({
         url: url,
         timeout: timeout,
+        header: init?.headers,
         ...init,
         success(res) {
           const response = new RequestResponse({

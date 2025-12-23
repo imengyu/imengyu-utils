@@ -16,6 +16,7 @@ import LogUtils from './LogUtils';
 import CalendarUtils from './CalendarUtils';
 import DownloadUtils from './DownloadUtils';
 
+export * from './Assertion';
 export * from './timer/Debounce';
 export * from './timer/Throttle';
 export * from './timer/Timer';

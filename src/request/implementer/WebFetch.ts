@@ -33,7 +33,7 @@ const fetchImplementer : RequestImplementer = {
 
     // 发起 fetch 请求
     const response = fetch(url, { 
-      headers: init?.header,
+      headers: init?.headers,
       method: init?.method,
       body,
       signal 

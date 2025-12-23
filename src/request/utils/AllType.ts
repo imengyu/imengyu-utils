@@ -47,6 +47,4 @@ export interface QueryParams {
   [index: string]: TypeAll;
 }
 
-export interface HeaderType {
-  [key: string]: string;
-}
+export type HeaderType = Record<string, string>;

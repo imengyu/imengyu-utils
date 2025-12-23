@@ -11,27 +11,65 @@
  * See License.txt in the project root for license information.
  */
 
-import { DataModel, type NewDataModel } from "@imengyu/js-request-transform";
+import { type NewDataModel } from "@imengyu/js-request-transform";
 import type { KeyValue } from "@imengyu/js-request-transform/dist/DataUtils";
+import { RequestApiInfoStruct, RequestOptions } from "./RequestCore";
+import { HeaderType } from "../utils/AllType";
+import { requireNotNull } from "@/Assertion";
 
 /**
  * API 的返回结构体
  */
-export class RequestApiResult<T extends DataModel> {
+export class RequestApiResult<T = undefined> implements RequestApiInfoStruct {
+
+  public apiName = '';
+  public apiUrl = '';
+  public apiMethod = '';
+  public apiRawReq: RequestOptions|undefined;
+
+  /**
+   * 返回状态码
+   */
   public code = 0;
+  /**
+   * 返回状态消息
+   */
   public message = '';
-  public data: T|KeyValue|KeyValue[]|null = null;
+  /**
+   * 正常返回的数据
+   */
+  public data: T|undefined;
+  /**
+   * 本次请求的返回头
+   */
+  public headers: HeaderType|undefined;
   /**
    * 无类型数据
    */
   public data2: any = null;
+  /**
+   * 原始数据
+   */
   public raw: any = null;
+  /**
+   * 指示data是否为数据模型类型
+   */
+  public readonly isDataModel: boolean;
 
-  public constructor(c: NewDataModel|null, code? : number, message? : string, data?: Record<string, unknown>|null, rawData?: Record<string, unknown>|null) {
-    if (typeof code !== 'undefined')
-      this.code = code;
-    if (typeof message !== 'undefined')
-      this.message = message;
+  public constructor(
+    c: NewDataModel|null, 
+    code? : number, 
+    message? : string, 
+    data?: Record<string, unknown>|null, 
+    rawData?: Record<string, unknown>|null,
+    headers?: HeaderType|undefined,
+    apiInfo?: RequestApiInfoStruct,
+  ) {
+    this.code = code || -1;
+    this.message = message || '';
+    this.data2 = this.data;
+    this.headers = headers;
+    this.isDataModel = c !== null;
 
     //转换数据
     if (typeof data !== 'undefined' && c)
@@ -40,11 +78,20 @@ export class RequestApiResult<T extends DataModel> {
       this.data = new c().fromServerSide(rawData as KeyValue) as T;//如果data为空则转换rawData
     else
       this.data = data as KeyValue as T; //原始数据
+
+    //如果rawData为空则使用data
     if (typeof rawData !== 'undefined')
       this.raw = rawData;
     else
       this.raw = this.data;
-    this.data2 = this.data;
+
+    //设置API信息
+    if (apiInfo) {
+      this.apiName = apiInfo.apiName || '';
+      this.apiUrl = apiInfo.apiUrl || '';
+      this.apiMethod = apiInfo.apiMethod || '';
+      this.apiRawReq = apiInfo.apiRawReq;
+    }
   }
 
   /**
@@ -52,28 +99,28 @@ export class RequestApiResult<T extends DataModel> {
    * @param model 另一个数据
    * @returns
    */
-  public cloneWithOtherModel<U extends DataModel>(model: U) : RequestApiResult<U> {
+  public cloneWithOtherData<U extends Record<string, unknown> | null | undefined>(model: U) : RequestApiResult<U> {
     return new RequestApiResult(
       null,
       this.code,
       this.message,
-      model.keyValue(),
-      this.raw
+      model,
+      this.raw,
+      this.headers,
+      {
+        apiName: this.apiName,
+        apiUrl: this.apiUrl,
+        apiMethod: this.apiMethod,
+        apiRawReq: this.apiRawReq,
+      },
     );
   }
-  public arrayData() : KeyValue[] {
-    if (this.data instanceof Array)
-      return this.data;
-    throw new Error('不是数组类型');
-  }
   /**
-   * 转为纯JSON格式
+   * 读取值并且确保不为空
    * @returns
    */
-  public keyValueData() : KeyValue {
-    if (this.data instanceof Array)
-      throw new Error('RequestApiResult.keyValueData: 不能转换数组类型');
-    return (this.data instanceof DataModel ? this.data?.keyValue() : this.data) || {};
+  public requireData() : T {
+    return requireNotNull(this.data, 'data is null');
   }
   /**
    * 转为字符串表达形式
@@ -86,22 +133,26 @@ export class RequestApiResult<T extends DataModel> {
 
 /**
  * 指示这个错误发生的类型
+ * 错误类型：
+ * * networkError：网络连接错误
+ * * statusError：状态错误（返回了400-499错误状态码）
+ * * serverError：服务器错误（返回了500-599错误状态码）
+ * * businessError：业务错误（状态码200，但是业务逻辑自定义判断条件失败）
+ * * scriptError：脚本错误（通常是代码异常被catch）
+ * * unknow：未知错误
  */
 export type RequestApiErrorType = 'networkError'|'statusError'|'serverError'|'businessError'|'scriptError'|'unknow';
 
 /**
  * API 的错误信息
  */
-export class RequestApiError {
+export class RequestApiError implements RequestApiInfoStruct {
 
-  /**
-   * 本次请求错误的 API 名字
-   */
   public apiName = '';
-  /**
-   * 本次请求错误的 API URL
-   */
   public apiUrl = '';
+  public apiMethod = '';
+  public apiRawReq: RequestOptions|undefined;
+
   /**
    * 指示这个错误发生的类型
    * * networkError：网络连接错误
@@ -132,9 +183,9 @@ export class RequestApiError {
    */
   public rawData: KeyValue|null = null;
   /**
-   * 本次请求的原始参数
+   * 本次请求的返回头
    */
-  public rawRequest: RequestInit|null = null;
+  public headers: HeaderType|null = null;
 
   public constructor(
     errorType: RequestApiErrorType,
@@ -143,19 +194,20 @@ export class RequestApiError {
     code = 0,
     data: KeyValue|null = null,
     rawData: unknown|null = null,
-    rawRequest: RequestInit|null = null,
-    apiName = '',
-    apiUrl = ''
+    headers?: HeaderType,
+    apiInfo?: RequestApiInfoStruct,
   ) {
     this.errorType = errorType;
     this.errorMessage = errorMessage;
     this.errorCodeMessage = errorCodeMessage;
     this.code = code;
     this.data = data;
-    this.apiName = apiName;
-    this.apiUrl = apiUrl;
+    this.apiName = apiInfo?.apiName || '';
+    this.apiUrl = apiInfo?.apiUrl || '';
+    this.apiMethod = apiInfo?.apiMethod || '';
+    this.apiRawReq = apiInfo?.apiRawReq;
     this.rawData = rawData as KeyValue;
-    this.rawRequest = rawRequest as KeyValue;
+    this.headers = headers || null;
   }
 
   /**
@@ -166,8 +218,7 @@ export class RequestApiError {
     return `请求${this.apiName}错误 ${this.errorMessage} (${this.errorType}) ${this.code}(${this.errorCodeMessage})\n` +
       `url: ${this.apiUrl}\n` +
       `data: ${JSON.stringify(this.data)}\n` +
-      `rawData: ${JSON.stringify(this.rawData)}\n` +
-      `rawRequest: ${JSON.stringify(this.rawRequest)}\n`;
+      `rawData: ${JSON.stringify(this.rawData)}\n`;
   }
   /**
    * 转为字符串表达形式

@@ -1,16 +1,14 @@
 import ApiConfig from "./RequestApiConfig";
 import { DataModel, type NewDataModel } from "@imengyu/js-request-transform";
 import { RequestApiError, type RequestApiErrorType, RequestApiResult } from "./RequestApiResult";
-import { RequestCoreInstance, RequestOptions, RequestResponse } from "./RequestCore";
+import { RequestApiInfoStruct, RequestCoreInstance, RequestOptions, RequestResponse } from "./RequestCore";
 import LogUtils from "@/LogUtils";
 
 /**
  * 请求错误与数据处理函数
  *
  * 这里写的是请求中的 数据处理函数 与 错误默认处理函数。
- *
- * 业务相关的自定义数据处理函数，请单独在RequestModules中写明。
- *
+ * 
  * Author: imengyu
  * Date: 2022/03/28
  *
@@ -21,7 +19,7 @@ import LogUtils from "@/LogUtils";
 const TAG = 'API Debugger';
 
 //默认的请求数据处理函数
-export function defaultResponseDataHandler<T extends DataModel>(response: RequestResponse, req: RequestOptions, resultModelClass: NewDataModel|undefined, instance: RequestCoreInstance<T>, apiName: string|undefined) : Promise<RequestApiResult<T>> {
+export function defaultResponseDataHandler<T extends DataModel>(response: RequestResponse, req: RequestOptions, resultModelClass: NewDataModel|undefined, instance: RequestCoreInstance<T>, apiInfo: RequestApiInfoStruct) : Promise<RequestApiResult<unknown>> {
   return new Promise<RequestApiResult<T>>((resolve, reject) => {
     const method = req.method || 'GET';
     response.json().then((json) => {
@@ -31,23 +29,40 @@ export function defaultResponseDataHandler<T extends DataModel>(response: Reques
           LogUtils.printLog(TAG, 'success', `Request [${method}] ` + response.url + ' success (' + response.status + ') ' + (ApiConfig.getConfig().EnableApiDataLog ? JSON.stringify(json) : ''));
 
         //情况1-1，请求成功，状态码200-299
-        resolve(new RequestApiResult(resultModelClass ?? instance.config.modelClassCreator, response.status, json.message, json.data, json));
+        resolve(new RequestApiResult(
+          resultModelClass ?? instance.config.modelClassCreator, 
+          response.status, 
+          json.message, 
+          json.data, 
+          json, 
+          response.headers, 
+          apiInfo
+        ));
       } else {
         if (ApiConfig.getConfig().EnableApiRequestLog)
           LogUtils.printLog(TAG, 'error', `Request [${method}] ${response.url} Got error from server : ` + json.message + ' (' + json.code + ') ' + (ApiConfig.getConfig().EnableApiDataLog ? JSON.stringify(json) : ''));
 
         //情况1-2，请求失败，状态码>299
-        const err = new RequestApiError('statusError', json.message, '状态码异常', json.code || response.status, json.data, json, req, apiName, response.url);
+        const err = new RequestApiError(
+          'statusError', 
+          `状态码异常 ${json.message}`, 
+          instance.findErrCode(json.code || response.status), 
+          json.code || response.status, 
+          json.data, 
+          json, 
+          response.headers, 
+          apiInfo
+        );
 
         //错误报告
-        if (instance.checkShouldReportError(err))
-          instance.reportError(err);
+        if (instance.checkShouldReportError(err, response, apiInfo))
+          instance.reportError(err, response, apiInfo);
 
         reject(err);
       }
     }).catch((err) => {
       //错误统一处理
-      defaultResponseDataHandlerCatch(method, req, response, null, err, apiName, response.url, reject, instance);
+      defaultResponseDataHandlerCatch(method, req, response, null, err, apiInfo, response.url, reject, instance);
     });
   });
 }
@@ -106,20 +121,28 @@ export function defaultResponseDataGetErrorInfo(response: RequestResponse, err: 
   return {errString, errType, errCodeStr};
 }
 //默认的请求数据处理函数
-export function defaultResponseDataHandlerCatch<T extends DataModel>(method: string, req: RequestOptions, response: RequestResponse, data: any, err: any, apiName: string|undefined, apiUrl: string, reject: (reason?: any) => void, instance: RequestCoreInstance<T>) {
+export function defaultResponseDataHandlerCatch<T extends DataModel>(method: string, req: RequestOptions, response: RequestResponse, data: any, err: any, apiInfo: RequestApiInfoStruct, apiUrl: string, reject: (reason?: any) => void, instance: RequestCoreInstance<T>) {
   if (ApiConfig.getConfig().EnableApiRequestLog) {
-    LogUtils.printLog(TAG, 'error', `E > ${apiName} ` + err + ' status: ' + response.status);
+    LogUtils.printLog(TAG, 'error', `E > ${apiInfo.apiName} ` + err + ' status: ' + response.status);
     if (err instanceof Error)
       console.error(err.stack);
   }
 
-  
   const {errString, errType, errCodeStr} = defaultResponseDataGetErrorInfo(response, err);
-  const errObj = new RequestApiError(errType, errString, errCodeStr, response.status, null, data, req, apiName, apiUrl);
+  const errObj = new RequestApiError(
+    errType, 
+    errString, 
+    errCodeStr, 
+    response.status, 
+    null, 
+    data, 
+    response.headers, 
+    apiInfo
+  );
 
   //错误报告
-  if (instance.checkShouldReportError(errObj))
-    instance.reportError(errObj);
+  if (instance.checkShouldReportError(errObj, response, apiInfo))
+    instance.reportError(errObj, response, apiInfo);
   reject(errObj);
 }
 
