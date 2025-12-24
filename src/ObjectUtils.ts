@@ -589,6 +589,15 @@ function seal<T extends object>(obj: T): T {
 }
 
 /**
+ * 检查对象是否为空（null、undefined或空字符串）
+ * @param obj 要检查的对象
+ * @returns 是否为空
+ */
+function isNullOrEmpty(obj: any): boolean {
+  return obj === null || obj === undefined || obj === '';
+}
+
+/**
  * 对象工具类
  */
 const ObjectUtils = {
@@ -600,6 +609,7 @@ const ObjectUtils = {
   isDefined,
   isDefinedAndNotNull,
   isObjectAllKeyNull,
+  isNullOrEmpty,
   equalsObject,
   equalsObjectOneLevel,
   mergeObject,

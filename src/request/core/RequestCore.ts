@@ -353,7 +353,9 @@ export class RequestCoreInstance<T extends DataModel> {
    * @param apiName 名称，用于日志和调试
    * @returns 返回 Promise
    */
-  async request<M = undefined>(url: string, req: RequestOptions, apiName: string, modelClassCreator: ModelClassCreatorDefine<M>|undefined, cache?: RequestCacheConfig) : Promise<RequestApiResult<M>> {   
+  async request<M = undefined>(url: string, querys: QueryParams|undefined, req: RequestOptions, apiName: string, modelClassCreator: ModelClassCreatorDefine<M>|undefined, cache?: RequestCacheConfig) : Promise<RequestApiResult<M>> {   
+    //合并URL
+    url = this.makeUrl(url, querys);
     //附加请求头
     req.headers = this.mergerDefaultHeader(req.headers);
     //拦截器
@@ -463,7 +465,7 @@ export class RequestCoreInstance<T extends DataModel> {
    * @param cache 缓存参数
    */
   get<M = undefined>(url: string, apiName: string, querys?: QueryParams, modelClassCreator?: ModelClassCreatorDefine<M>, cache?: RequestCacheConfig, headers?: KeyValue) {
-    return this.request<M>(this.makeUrl(url, querys), { method: 'GET', headers }, apiName, modelClassCreator, cache);
+    return this.request<M>(url, querys, { method: 'GET', headers }, apiName, modelClassCreator, cache);
   }
   /**
    * POST 请求
@@ -473,7 +475,7 @@ export class RequestCoreInstance<T extends DataModel> {
    * @param cache 缓存参数
    */
   post<M = undefined>(url: string, apiName: string, data?: KeyValue|FormData|undefined, querys?: QueryParams, modelClassCreator?: ModelClassCreatorDefine<M>, cache?: RequestCacheConfig, headers?: KeyValue) {
-    return this.request<M>(this.makeUrl(url, querys), { method: 'POST', data, headers }, apiName, modelClassCreator, cache);
+    return this.request<M>(url, querys, { method: 'POST', data, headers }, apiName, modelClassCreator, cache);
   }
   /**
    * PUT 请求
@@ -483,7 +485,7 @@ export class RequestCoreInstance<T extends DataModel> {
    * @param cache 缓存参数
    */
   put<M = undefined>(url: string, apiName: string, data?: KeyValue|undefined, querys?: QueryParams, modelClassCreator?: ModelClassCreatorDefine<M>, cache?: RequestCacheConfig, headers?: KeyValue) {
-    return this.request<M>(this.makeUrl(url, querys), { method: 'PUT', data, headers }, apiName, modelClassCreator, cache);
+    return this.request<M>(url, querys, { method: 'PUT', data, headers }, apiName, modelClassCreator, cache);
   }
   /**
    * DELETE 请求
@@ -493,6 +495,6 @@ export class RequestCoreInstance<T extends DataModel> {
    * @param cache 缓存参数
    */
   delete<M = undefined>(url: string, apiName: string, data?: KeyValue|undefined, querys?: QueryParams, modelClassCreator?: ModelClassCreatorDefine<M>, cache?: RequestCacheConfig, headers?: KeyValue) {
-    return this.request<M>(this.makeUrl(url, querys), { method: 'DELETE', data, headers }, apiName, modelClassCreator, cache);
+    return this.request<M>(url, querys, { method: 'DELETE', data, headers }, apiName, modelClassCreator, cache);
   }
 }
