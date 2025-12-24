@@ -65,6 +65,15 @@ export const LogUtils = {
         '',
       );
     }
+  },
+  /**
+   * 打印日志并返回对象
+   * @param obj 要返回的对象
+   * @returns 返回对象
+   */
+  logAndReturn(obj: any, message = '返回对象') {
+    console.log(message, obj);
+    return obj;
   }
 };
 
