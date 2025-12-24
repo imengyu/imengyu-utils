@@ -27,7 +27,7 @@ interface ApiConfigInterface {
   */
   EnableApiRequestLog: boolean,
   /**
-  * 是否在每一个请求都在控制台上打印出休息数据
+  * 是否在每一个请求都在控制台上打印出数据
   */
   EnableApiDataLog: boolean,
   /**
@@ -50,8 +50,18 @@ let config = defaultConfig;
  * 请求中的默认配置
  */
 const RequestApiConfig = {
+  /**
+   * 获取当前的配置
+   */
   getConfig() : ApiConfigInterface { return config; },
+  /**
+   * 设置新的配置
+   */
   setConfig(newConfig: ApiConfigInterface): void { config = newConfig; },
+  /**
+   * 追加新的配置
+   */
+  appendConfig(newConfig: ApiConfigInterface): void { config = {...config, ...newConfig}; },
 };
 
 export default RequestApiConfig;
