@@ -473,6 +473,19 @@ function getDateEndOfYear(date: Date) {
   const day = getMonthDays(year, month)
   return new Date(year, month - 1, day, 23, 59, 59)
 }
+/**
+ * 限制日期在源日期加上指定时长的范围内
+ * @param sourceDate 源日期（基准日期）
+ * @param limitDuration 限制时长（毫秒）
+ * @param inputDate 需要检查的输入日期
+ * @returns 如果输入日期超过源日期+限制时长，则返回限制的日期，否则返回输入日期
+ */
+function limitDateRange(sourceDate: Date | string | number, limitDuration: number, inputDate: Date | string | number) {
+  const parsedSourceDate = DateUtils.parseDate(sourceDate);
+  const parsedInputDate = DateUtils.parseDate(inputDate);
+  const maxDate = new Date(parsedSourceDate.getTime() + limitDuration);
+  return parsedInputDate <= maxDate ? parsedInputDate : maxDate;
+}
 
 const DateUtils = {
   FormatStrings: {
@@ -541,6 +554,7 @@ const DateUtils = {
   getWeekdayStr,
   getDayDiff,
   getDayGap,
+  limitDateRange,
 }
 
 export default DateUtils;
