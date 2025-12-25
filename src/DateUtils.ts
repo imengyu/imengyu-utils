@@ -3,6 +3,13 @@ import FormatUtils from "./FormatUtils";
 /**
  * 格式化日期为字符串。
  * 
+ * 示例：
+ * ```
+ * formatDate(new Date(), 'YYYY-MM-dd HH:ii:ss'); // '2023-08-15 14:30:00'
+ * formatDate(new Date(), 'YYYY-MM-dd'); // '2023-08-15'
+ * formatDate(new Date(), 'HH:ii:ss'); // '14:30:00'
+ * ```
+ * 
  * 模板支持以下格式字符串：
  * |名称|说明|
  * |--|--|
@@ -11,35 +18,85 @@ import FormatUtils from "./FormatUtils";
  * |MM|两位月份，例如01，12|
  * |M|一位月份，例如1，11|
  * |dd|两位日期，例如15|
- * |DD|同dd|
+ * |DD|两位日期，同dd|
+ * |D|一位日期，例如5，15|
  * |HH|24小时制的两位小时数，例如04，23|
- * |hh|12小时制的两位小时数，例如05|
- * |mm|两位分钟数|
- * |ii|同mm|
- * |ss|两位秒数|
+ * |H|24小时制的一位小时数，例如4，13|
+ * |hh|12小时制的两位小时数，例如05，01|
+ * |mm|两位分钟数，例如05，45|
+ * |m|一位分钟数，例如5，45|
+ * |ii|两位分钟数，同mm|
+ * |ss|两位秒数，例如09，30|
+ * |s|一位秒数，例如9，30|
  * 
- * @param date 日期
- * @param formatStr 日期格式化模板，不填写默认是 `'YYYY-MM-dd HH:ii:ss'`
+ * @param date 日期对象或时间戳（秒/毫秒级，13位=毫秒，10位=秒）
+ * @param format 日期格式化模板，不填写默认是 `'YYYY-MM-dd HH:ii:ss'`
+ * @param defaultValue 传入空或者时的默认值，不填写默认是 `'[Invald Date]'`
+ * @returns 格式化后的日期字符串
  */
-function formatDate(date: Date, formatStr?: string) {
-  const pad = FormatUtils.formatNumberWithZero;
-  let str = formatStr ? formatStr : "YYYY-MM-dd HH:ii:ss";
+function formatDate(
+  date: Date|number|undefined, 
+  format = 'YYYY-MM-dd HH:ii:ss', 
+  defaultValue = '[Invald Date]'
+) {
+  // 1. 处理非法日期，返回空字符串
+  let targetDate: Date;
+  if (!date) {
+    return defaultValue || '';
+  }
 
-  //let Week = ['日','一','二','三','四','五','六'];
-  str = str.replace(/yyyy|YYYY/, (date.getFullYear()).toString());
-  str = str.replace(/MM/, pad(date.getMonth() + 1, 2));
-  str = str.replace(/M/, (date.getMonth() + 1).toString());
-  str = str.replace(/dd|DD/, pad(date.getDate(), 2));
-  str = str.replace(/d/, date.getDate().toString());
-  str = str.replace(/HH/, pad(date.getHours(), 2));
-  str = str.replace(
-    /hh/,
-    pad(date.getHours() > 12 ? date.getHours() - 12 : date.getHours(), 2)
-  );
-  str = str.replace(/mm/, pad(date.getMinutes(), 2));
-  str = str.replace(/ii/, pad(date.getMinutes(), 2));
-  str = str.replace(/ss/, pad(date.getSeconds(), 2));
-  return str;
+  // 2. 统一转换为 Date 对象
+  if (date instanceof Date) {
+    targetDate = date;
+  } else if (typeof date === 'number') {
+    // 处理时间戳（支持秒/毫秒级，自动判断：13位=毫秒，10位=秒）
+    targetDate = new Date(date.toString().length === 10 ? date * 1000 : date);
+  } else {
+    targetDate = new Date(date);
+  }
+
+  // 3. 验证 Date 对象有效性
+  if (isNaN(targetDate.getTime())) {
+    console.warn(`[formatDate] 非法日期：${date}`);
+    return '';
+  }
+
+  // 4. 提取日期组件（补零处理）
+  const year = targetDate.getFullYear();
+  const month = targetDate.getMonth() + 1; // 月份从 0 开始，需 +1
+  const day = targetDate.getDate();
+  const hours = targetDate.getHours();
+  const minutes = targetDate.getMinutes();
+  const seconds = targetDate.getSeconds();
+
+  // 补零工具函数
+  const padZero = (num: number): string => FormatUtils.formatNumberWithZero(num, 2);
+
+  // 5. 替换格式化模板
+  const hours12 = hours % 12 || 12; // 12小时制
+  
+  const replaceMap: Record<string, string | number> = {
+    YYYY: year,
+    yyyy: year,
+    MM: padZero(month),
+    M: month, // 一位月份
+    DD: padZero(day),
+    D: day, // 一位日期
+    dd: padZero(day), // 两位日期
+    HH: padZero(hours), // 24小时制两位小时数
+    H: hours, // 24小时制一位小时数
+    hh: padZero(hours12), // 12小时制两位小时数
+    mm: padZero(minutes), // 两位分钟数
+    m: minutes, // 一位分钟数
+    ii: padZero(minutes), // 两位分钟数，同mm
+    ss: padZero(seconds), // 两位秒数
+    s: seconds, // 一位秒数
+  };
+
+  // 6. 遍历替换模板中的占位符
+  return format.replace(/YYYY|yyyy|MM|M|DD|D|dd|HH|H|hh|mm|m|ii|ss|s/g, (match) => {
+    return replaceMap[match].toString();
+  });
 }
 /**
  * 判断一个参数是不是有效的 Date 日期类型。
@@ -59,6 +116,16 @@ function isSameDay(day1: Date, day2: Date): boolean {
   return day1.getFullYear() === day2.getFullYear()
     && day1.getMonth() === day2.getMonth()
     && day1.getDate() === day2.getDate();
+}
+
+/**
+ * 判断两个时间是不是在同一月
+ * @param day1 时间1
+ * @param day2 时间2
+ */
+function isSameYearAndMonth(day1: Date, day2: Date): boolean {
+  return day1.getFullYear() === day2.getFullYear()
+    && day1.getMonth() === day2.getMonth();
 }
 
 /**
@@ -504,6 +571,7 @@ const DateUtils = {
   formatDate,
   isVaildDate,
   isSameDay,
+  isSameYearAndMonth,
   getTodayStart,
   getTodayEnd,
   getDateStartOfDay,
