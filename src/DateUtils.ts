@@ -407,8 +407,72 @@ function getTodayEnd() {
   const day = date.getDate()
   return new Date(year, month - 1, day, 23, 59, 59)
 }
-
-
+/**
+ * 获取指定日期的 00:00:00 时间
+ * @param date 
+ * @returns 
+ */
+function getDateStartOfDay(date: Date) {
+  const year = date.getFullYear()
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  return new Date(year, month - 1, day, 0, 0, 0)
+}
+/**
+ * 获取指定日期的 23:59:59 时间
+ * @param date 
+ * @returns 
+ */
+function getDateEndOfDay(date: Date) {
+  const year = date.getFullYear()
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  return new Date(year, month - 1, day, 23, 59, 59)
+}
+/**
+ * 获取指定日期的月份起始
+ * @param date 
+ * @returns 
+ */
+function getDateStartOfMonth(date: Date) {
+  const year = date.getFullYear()
+  const month = date.getMonth() + 1
+  const day = 1
+  return new Date(year, month - 1, day, 0, 0, 0)
+}
+/**
+ * 获取指定日期的月份结束
+ * @param date 
+ * @returns 
+ */
+function getDateEndOfMonth(date: Date) {
+  const year = date.getFullYear()
+  const month = date.getMonth() + 1
+  const day = getMonthDays(year, month)
+  return new Date(year, month - 1, day, 23, 59, 59)
+}
+/**
+ * 获取指定日期的年份起始
+ * @param date 
+ * @returns 
+ */
+function getDateStartOfYear(date: Date) {
+  const year = date.getFullYear()
+  const month = 1
+  const day = 1
+  return new Date(year, month - 1, day, 0, 0, 0)
+}
+/**
+ * 获取指定日期的年份结束
+ * @param date 
+ * @returns 
+ */
+function getDateEndOfYear(date: Date) {
+  const year = date.getFullYear()
+  const month = 12
+  const day = getMonthDays(year, month)
+  return new Date(year, month - 1, day, 23, 59, 59)
+}
 
 const DateUtils = {
   FormatStrings: {
@@ -429,6 +493,12 @@ const DateUtils = {
   isSameDay,
   getTodayStart,
   getTodayEnd,
+  getDateStartOfDay,
+  getDateEndOfDay,
+  getDateStartOfMonth,
+  getDateEndOfMonth,
+  getDateStartOfYear,
+  getDateEndOfYear,
   /**
    * 日期加上指定天数
    * @param date 日期
