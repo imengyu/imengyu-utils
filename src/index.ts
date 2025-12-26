@@ -18,6 +18,7 @@ import DownloadUtils from './DownloadUtils';
 
 export * from './Assertion';
 export * from './timer/Debounce';
+export * from './timer/MemoryTimeOut';
 export * from './timer/Throttle';
 export * from './timer/Timer';
 export * from './events/CallbackEmitter';
