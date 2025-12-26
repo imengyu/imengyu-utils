@@ -147,10 +147,19 @@ export function defaultResponseDataHandlerCatch<T extends DataModel>(method: str
 }
 
 //默认的请求错误处理函数
-export function defaultResponseErrorHandler(err: Error) : RequestApiError {
-  if (err instanceof Error)
-    LogUtils.printLog(TAG, 'error', 'Error : ' + err + (err.stack ? ('\n' + err.stack) : ''));
+export function defaultResponseErrorHandler(err: Error, instance: RequestCoreInstance<any>, apiInfo: RequestApiInfoStruct) : RequestApiError {
+  function createError(type: RequestApiErrorType, message: string) {
+    return new RequestApiError(type, message, '', -1, undefined, err, undefined, apiInfo);
+  }
+  
+  if (typeof err === 'object' && err instanceof Error) {
+    if (err.message.indexOf('Network Error') >= 0)
+      return createError('networkError', '网络异常: ' + err.message);
+    if (err.message.indexOf('timeout') >= 0 || err.message.indexOf('aborted without reason') >= 0)
+      return createError('networkError', '请求超时或被取消: ' + err.message);
+    LogUtils.printLog(TAG, 'error', '' + err + (err.stack ? ('\n' + err.stack) : ''));
+  }
   else
     LogUtils.printLog(TAG, 'error', 'Error : ' + JSON.stringify(err));
-  return new RequestApiError('unknow', '' + JSON.stringify(err));
+  return createError('unknow', '未知异常: ' + JSON.stringify(err));
 }
