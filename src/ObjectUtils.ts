@@ -598,11 +598,32 @@ function isNullOrEmpty(obj: any): boolean {
 }
 
 /**
+ * 字符串化对象，避免循环引用
+ * @param obj 要字符串化的对象
+ * @returns 字符串化后的对象
+ */
+function stringifyNoCircular(obj: any) {
+  const seen = new WeakSet();
+  return JSON.stringify(obj, (key, value) => {
+    // 只处理对象/数组（排除原始值）
+    if (typeof value === 'object' && value !== null) {
+      if (seen.has(value)) {
+        // 遇到循环引用：可返回 null/[Circular]/自定义标记
+        return '[Circular]';
+      }
+      seen.add(value);
+    }
+    return value;
+  });
+}
+
+/**
  * 对象工具类
  */
 const ObjectUtils = {
   clone,
   simpleClone,
+  stringifyNoCircular,
   copyValuesIfUndefined,
   cloneValuesToObject,
   deleteAllUndefined,
