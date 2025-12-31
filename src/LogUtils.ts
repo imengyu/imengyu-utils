@@ -1,4 +1,5 @@
 import DateUtils from "./DateUtils";
+import ObjectUtils from "./ObjectUtils";
 
 const logMessageTimeStyle = 'color:#666;background:#efefef;padding:2px 3px;border-radius:2px;margin-right:5px;';
 const logMessageTagStyle = (color: string) => `color:#fff;background:${color};padding:2px 3px;border-radius:2px;margin-right:5px;`;
@@ -19,6 +20,27 @@ const tagColors = {
 };
 
 export const LogUtils = {
+
+  /**
+   * 格式化任意错误信息
+   * @param error 错误对象
+   * @returns 格式化后的错误信息字符串
+   */
+  formatAnyError(error: any) {
+    if (error instanceof Error)
+      return LogUtils.formatError(error);
+    if (typeof error === 'object')
+      return 'ErrorObject: ' + ObjectUtils.stringifyNoCircular(error);
+    return `${error}`;
+  },
+  /**
+   * 格式化错误信息
+   * @param error 错误对象
+   * @returns 格式化后的错误信息字符串
+   */
+  formatError(error: Error) {
+    return `${error.stack || error.message}`;
+  },
   /**
    * 生成指定数量的空格字符串
    * @param str 原始字符串
