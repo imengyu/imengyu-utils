@@ -25,12 +25,13 @@ const fetchImplementer : RequestImplementer = {
     }
 
     let body : string|FormData|undefined;
-    if (init?.data instanceof FormData)
+    if (init?.data instanceof FormData) {
       body = init.data; 
-    else if (typeof init?.data === 'object') {
+      if (init?.headers['Content-Type'] == 'multipart/form-data')
+        delete init.headers['Content-Type'];
+    } else if (typeof init?.data === 'object') {
       body = JSON.stringify(init.data); 
     }
-
     // 发起 fetch 请求
     const response = fetch(url, { 
       headers: init?.headers,
