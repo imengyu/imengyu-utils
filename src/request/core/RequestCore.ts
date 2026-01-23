@@ -47,12 +47,12 @@ export interface RequestCoreConfig<T extends DataModel> {
   /**
    * 请求拦截。此函数用于在请求提交时携带某些数据，您可以在这里可以添加token或其他头部信息。
    */
-  requestInceptor?: (url: string, req: RequestOptions) => { newUrl: string, newReq: RequestOptions };
+  requestInterceptor?: (url: string, req: RequestOptions) => { newUrl: string, newReq: RequestOptions };
   /**
    * 响应拦截。通常用于处理响应数据，例如添加一些公共数据，
    * 这里是同步调用；异步的流程控制可以在 responseDataHandler 中处理。
    */
-  responseInceptor?: (response: RequestResponse) => RequestResponse;
+  responseInterceptor?: (response: RequestResponse) => RequestResponse;
   /**
    * 错误报告拦截
    * @param instance 请求实例
@@ -60,7 +60,7 @@ export interface RequestCoreConfig<T extends DataModel> {
    * @param apiInfo 请求信息
    * @returns 如果返回true，则不进行错误报告 reportError
    */
-  responseErrReoprtInceptor?: (instance: RequestCoreInstance<T>, err: RequestApiError, response: RequestResponse, apiInfo: RequestApiInfoStruct) => boolean;
+  responseErrorReportInterceptor?: (instance: RequestCoreInstance<T>, err: RequestApiError, response: RequestResponse, apiInfo: RequestApiInfoStruct) => boolean;
   /**
    * 错误报告函数。可以在这里报告错误，例如写入日志，上报到服务器。
    */
@@ -81,7 +81,7 @@ export interface RequestCoreConfig<T extends DataModel> {
    * @param resultModelClass 结果模型类
    * @param instance 请求实例
    * @param apiInfo 请求信息
-   * @returns 返回的对象将用于请求下一步处理。如果抛出了错误，那么还可以在 responseErrReoprtInceptor 中再处理一次错误
+   * @returns 返回的对象将用于请求下一步处理。如果抛出了错误，那么还可以在 responseErrorReportInterceptor 中再处理一次错误
    */
   responseDataHandler?: (response: RequestResponse, req: RequestOptions, resultModelClass: NewDataModel|undefined, instance: RequestCoreInstance<T>, apiInfo: RequestApiInfoStruct) => Promise<RequestApiResult<unknown>>;
   /**
@@ -95,7 +95,9 @@ export interface RequestCoreConfig<T extends DataModel> {
    */
   modelClassCreator: ModelClassCreatorDefine<T>|null;
 }
-
+/**
+ * 请求信息结构体
+ */
 export interface RequestApiInfoStruct {
   /**
    * 请求名称
@@ -115,10 +117,15 @@ export interface RequestApiInfoStruct {
   apiRawReq: RequestOptions|undefined,
 }
 
-
+/**
+ * 请求返回体数据获取接口
+ */
 export interface RequestResponseGetData {
   json?: () => Promise<any>,
 }
+/**
+ * 请求返回体
+ */
 export class RequestResponse {
 
   public constructor(options: {
@@ -152,6 +159,9 @@ export class RequestResponse {
 
 type ModelClassCreatorDefine<T> = (new () => T);
 
+/**
+ * 请求缓存配置
+ */
 export interface RequestCacheConfig {
   /**
    * 缓存保存时间，毫秒。超过时间后再请求时会发请求
@@ -162,12 +172,17 @@ export interface RequestCacheConfig {
    */
   cacheEnable: boolean,
 }
-
+/**
+ * 请求缓存存储结构体
+ */
 export interface RequestCacheStorage {
   time: number,
   data: TypeSaveable
 }
 
+/**
+ * 请求参数结构体
+ */
 export class RequestOptions {
   /**
    * 请求的参数
@@ -212,6 +227,10 @@ export class RequestOptions {
  */
 export class RequestCoreInstance<T extends DataModel> {
 
+  /**
+   * 请求核心实例类构造函数
+   * @param implementer 请求实现类
+   */
   constructor(implementer: RequestImplementer) {
     this.implementer = implementer;
     this.config.baseUrl = RequestApiConfig.getConfig().BaseUrl;
@@ -239,8 +258,8 @@ export class RequestCoreInstance<T extends DataModel> {
    * 检查是否需要报告错误
    */
   checkShouldReportError(err: RequestApiError, response: RequestResponse, apiInfo: RequestApiInfoStruct) {
-    if (typeof this.config.responseErrReoprtInceptor === 'function')
-      return this.config.responseErrReoprtInceptor(this, err, response, apiInfo) !== true;
+    if (typeof this.config.responseErrorReportInterceptor === 'function')
+      return this.config.responseErrorReportInterceptor(this, err, response, apiInfo) !== true;
     return true;
   }
   /**
@@ -359,8 +378,8 @@ export class RequestCoreInstance<T extends DataModel> {
     //附加请求头
     req.headers = this.mergerDefaultHeader(req.headers);
     //拦截器
-    if (this.config.requestInceptor) {
-      const { newUrl, newReq } = this.config.requestInceptor(url, req);
+    if (this.config.requestInterceptor) {
+      const { newUrl, newReq } = this.config.requestInterceptor(url, req);
       url = newUrl;
       req = newReq;
     }
@@ -418,8 +437,8 @@ export class RequestCoreInstance<T extends DataModel> {
       //发起请求
       let res = await this.implementer.doRequest(url, req, this.config.timeout)
       //响应拦截
-      if (this.config.responseInceptor)
-        res = this.config.responseInceptor(res);
+      if (this.config.responseInterceptor)
+        res = this.config.responseInterceptor(res);
 
       if (!this.config.responseDataHandler)
         throw new RequestApiError(

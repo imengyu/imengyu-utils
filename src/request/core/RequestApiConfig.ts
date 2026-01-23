@@ -61,7 +61,7 @@ const RequestApiConfig = {
   /**
    * 追加新的配置
    */
-  appendConfig(newConfig: ApiConfigInterface): void { config = {...config, ...newConfig}; },
+  appendConfig(newConfig: Partial<ApiConfigInterface>): void { config = {...config, ...newConfig}; },
 };
 
 export default RequestApiConfig;
