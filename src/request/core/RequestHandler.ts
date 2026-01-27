@@ -151,7 +151,8 @@ export function defaultResponseErrorHandler(err: Error, instance: RequestCoreIns
   function createError(type: RequestApiErrorType, message: string) {
     return new RequestApiError(type, message, '', -1, undefined, err, undefined, apiInfo);
   }
-  
+  if (err instanceof RequestApiError)
+    return err;
   if (typeof err === 'object' && err instanceof Error) {
     if (err.message.indexOf('Network Error') >= 0)
       return createError('networkError', '网络异常: ' + err.message);
