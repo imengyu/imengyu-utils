@@ -47,7 +47,7 @@ export interface RequestCoreConfig<T extends DataModel> {
   /**
    * 请求拦截。此函数用于在请求提交时携带某些数据，您可以在这里可以添加token或其他头部信息。
    */
-  requestInterceptor?: (url: string, req: RequestOptions) => { newUrl: string, newReq: RequestOptions };
+  requestInterceptor?: (url: string, req: RequestOptions) => { newUrl: string, newReq: RequestOptions }|Promise<{ newUrl: string, newReq: RequestOptions }>;
   /**
    * 响应拦截。通常用于处理响应数据，例如添加一些公共数据，
    * 这里是同步调用；异步的流程控制可以在 responseDataHandler 中处理。
@@ -379,7 +379,7 @@ export class RequestCoreInstance<T extends DataModel> {
     req.headers = this.mergerDefaultHeader(req.headers);
     //拦截器
     if (this.config.requestInterceptor) {
-      const { newUrl, newReq } = this.config.requestInterceptor(url, req);
+      const { newUrl, newReq } = await this.config.requestInterceptor(url, req);
       url = newUrl;
       req = newReq;
     }
