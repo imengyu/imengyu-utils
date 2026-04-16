@@ -33,6 +33,6 @@
     "vite-plugin-dts": "^4.2.1"
   },
   "dependencies": {
-    "@imengyu/js-request-transform": "^0.3.6"
+    "@imengyu/js-request-transform": "^0.4.0"
   }
 }
