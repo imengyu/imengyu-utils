@@ -176,7 +176,7 @@ export interface RequestCacheConfig {
  * 请求缓存存储结构体
  */
 export interface RequestCacheStorage {
-  time: number,
+  expireAt: number,
   data: TypeSaveable
 }
 
@@ -353,7 +353,7 @@ export class RequestCoreInstance<T extends DataModel> {
       //获取数据
       const cacheData = await this.implementer.getCache(requestHash)
       //没有过期
-      if (cacheData && cacheData.time < new Date().getTime()) {
+      if (cacheData && new Date().getTime() < cacheData.expireAt) {
         return {
           cacheTime,
           cacheKey: requestHash,
@@ -413,7 +413,7 @@ export class RequestCoreInstance<T extends DataModel> {
     //保存缓存
     if (cacheTime > 0) {
       this.implementer.setCache(cacheKey, {
-        time: new Date().getTime() + cacheTime,
+        expireAt: new Date().getTime() + cacheTime,
         data: result as unknown as TypeSaveable,
       });
     }
