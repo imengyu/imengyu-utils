@@ -398,8 +398,6 @@ export class RequestCoreInstance<T extends DataModel> {
     //缓存处理
     const { cacheTime, cacheKey, cacheRes } = await this.solveCache(url, req, cache);
 
-    console.log('1', cacheTime, cacheKey, cacheRes);
-
     //有缓存数据，则直接返回
     if (cacheRes) {
       if (RequestApiConfig.getConfig().EnableApiRequestLog)
