@@ -343,10 +343,13 @@ export class RequestCoreInstance<T extends DataModel> {
     cacheKey: string, 
     cacheRes: TypeSaveable
   }> {
-    const cacheTime = req.method === 'GET' ? this.checkCacheTime(cache) : 0;
+    const cacheTime = this.checkCacheTime(cache);
     let requestHash = '';
     if (cacheTime > 0) {
-      requestHash = "RequestCache" + StringUtils.stringHashCode(url + req.method);
+      if (req.method === 'GET')
+        requestHash = "RequestCache" + StringUtils.stringHashCode(url + req.method);
+      else
+        requestHash = "RequestCache" + StringUtils.stringHashCode(url + req.method + JSON.stringify(req.data));
       //获取数据
       const cacheData = await this.implementer.getCache(requestHash)
       //没有过期
