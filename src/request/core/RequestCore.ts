@@ -335,7 +335,7 @@ export class RequestCoreInstance<T extends DataModel> {
 
   //检查缓存参数
   private checkCacheTime(cache?: RequestCacheConfig) {
-    return cache && cache.cacheEnable && cache.cacheTime || 0;
+    return cache && cache.cacheEnable ? cache.cacheTime : 0;
   }
   //请求缓存处理
   private async solveCache(url: string, req: RequestOptions, cache: RequestCacheConfig|undefined) : Promise<{
@@ -357,7 +357,7 @@ export class RequestCoreInstance<T extends DataModel> {
         return {
           cacheTime,
           cacheKey: requestHash,
-          cacheRes: cacheData.time,
+          cacheRes: cacheData.data,
         }
       }
     }
@@ -398,11 +398,16 @@ export class RequestCoreInstance<T extends DataModel> {
     //缓存处理
     const { cacheTime, cacheKey, cacheRes } = await this.solveCache(url, req, cache);
 
+    console.log('1', cacheTime, cacheKey, cacheRes);
+
     //有缓存数据，则直接返回
     if (cacheRes) {
       if (RequestApiConfig.getConfig().EnableApiRequestLog)
         LogUtils.printLog(TAG, 'success', `C > ${apiName} (${cacheKey}/${cacheTime})`, ( RequestApiConfig.getConfig().EnableApiDataLog ? cacheRes.toString() : ''));
-      return cacheRes as unknown as RequestApiResult<M>;
+      
+      const classInstance = new RequestApiResult<M>(null);
+      classInstance.setFormOtherData(cacheRes as any);
+      return classInstance;
     }
 
     //发送请求并且处理响应数据
@@ -456,7 +461,7 @@ export class RequestCoreInstance<T extends DataModel> {
       //处理数据
       const result = await this.config.responseDataHandler(res, req, resultModelClass as any, this, apiInfo)
       //尝试保存缓存
-      saveCache && saveCache(result);
+      saveCache?.(result);
       //处理数据
       try {
         if (RequestApiConfig.getConfig().EnableApiRequestLog)

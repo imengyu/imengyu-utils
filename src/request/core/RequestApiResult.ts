@@ -67,7 +67,7 @@ export class RequestApiResult<T = undefined> implements RequestApiInfoStruct {
   ) {
     this.code = code || -1;
     this.message = message || '';
-    this.data2 = this.data;
+    this.data2 = data;
     this.headers = headers;
     this.isDataModel = c !== null;
 
@@ -117,10 +117,11 @@ export class RequestApiResult<T = undefined> implements RequestApiInfoStruct {
   }
   /**
    * 读取值并且确保不为空
+   * @param assertMessage 断言消息
    * @returns
    */
-  public requireData() : T {
-    return requireNotNull(this.data, 'data is null');
+  public requireData(assertMessage?: string) : T {
+    return requireNotNull(this.data, assertMessage || ('data is null! at: ' + this.apiName + '(' + this.apiUrl + ')'));
   }
   /**
    * 转为字符串表达形式
@@ -128,6 +129,25 @@ export class RequestApiResult<T = undefined> implements RequestApiInfoStruct {
    */
   public toString() : string {
     return `${this.code} ${this.message} data: ${JSON.stringify(this.data)} raw: ` + JSON.stringify(this.raw);
+  }
+
+  public setFormOtherData(data: KeyValue|RequestApiResult) {
+    if (data instanceof RequestApiResult) {
+      this.data = data.data;
+      this.data2 = data.data2;
+      this.code = data.code;
+      this.message = data.message;
+      this.headers = data.headers;
+      this.raw = data.raw;
+      this.apiName = data.apiName;
+      this.apiUrl = data.apiUrl;
+      this.apiMethod = data.apiMethod;
+      this.apiRawReq = data.apiRawReq;
+    } else {
+      for (const key in data) {
+        (this as unknown as Record<string, unknown>)[key] = data[key];
+      }
+    }
   }
 }
 
