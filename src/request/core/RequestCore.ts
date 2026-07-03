@@ -44,6 +44,25 @@ export interface RequestCoreConfig<T extends DataModel> {
    * 超时时间 ms
    */
   timeout: number,
+
+  /**
+   * 刷新token工具类配置，若配置了此参数，则会在请求失败时自动刷新token并重放请求。
+   */
+  refreshToken?: {
+    /**
+     * 回调：当请求错误时，此回调检测返回当前请求是否是token过期异常，返回 true 将进入刷新逻辑。
+     * @param err 错误信息
+     * @param instance 请求实例
+     * @param apiInfo 请求信息
+     */
+    isTokenExpireFail: (err: unknown, instance: RequestCoreInstance<T>, apiInfo: RequestApiInfoStruct) => boolean,
+    /**
+     * 回调：执行刷新token操作。
+     * @param instance 请求实例
+     */
+    doRefreshToken: (instance: RequestCoreInstance<T>) => Promise<void>,
+  };
+
   /**
    * 请求拦截。此函数用于在请求提交时携带某些数据，您可以在这里可以添加token或其他头部信息。
    */
@@ -254,6 +273,9 @@ export class RequestCoreInstance<T extends DataModel> {
    */
   implementer: RequestImplementer;
 
+  private _isRefreshing = false;
+  private _refreshQueue: Array<{ resolve: () => void, reject: (err: unknown) => void }> = [];
+
   /**
    * 检查是否需要报告错误
    */
@@ -421,7 +443,7 @@ export class RequestCoreInstance<T extends DataModel> {
   }
 
   //发送请求并且处理
-  private async requestAndResponse<M = T>(url: string, req: RequestOptions, apiName: string, resultModelClass: ModelClassCreatorDefine<M>|undefined, saveCache?: (result: unknown) => void) {
+  private async requestAndResponse<M = T>(url: string, req: RequestOptions, apiName: string, resultModelClass: ModelClassCreatorDefine<M>|undefined, saveCache?: (result: unknown) => void): Promise<RequestApiResult<M>> {
    
     const apiInfo: RequestApiInfoStruct = {
       apiName,
@@ -465,7 +487,7 @@ export class RequestCoreInstance<T extends DataModel> {
         if (RequestApiConfig.getConfig().EnableApiRequestLog)
           LogUtils.printLog(TAG, 'success', `R > ${apiName} (${res.status}/${result.code})`, ( RequestApiConfig.getConfig().EnableApiDataLog ? result.toString() : ''));
         //返回
-        return result;
+        return result as RequestApiResult<M>;
       } catch (e) {
         //捕获处理代码的异常
         LogUtils.printLog(TAG, 'error', 'E > Catch exception in promise : ' + e + ((e as Error).stack ? ('\n' + (e as Error).stack) : ''));
@@ -479,7 +501,32 @@ export class RequestCoreInstance<T extends DataModel> {
         );
       };
     } catch (err) {
-      throw this.config.responseErrorHandler ? this.config.responseErrorHandler(err, this, apiInfo) : err;
+      const processedErr = this.config.responseErrorHandler ? this.config.responseErrorHandler(err, this, apiInfo) : err;
+
+      if (this.config.refreshToken?.isTokenExpireFail(processedErr, this, apiInfo)) {
+        if (!this._isRefreshing) {
+          this._isRefreshing = true;
+          try {
+            await this.config.refreshToken.doRefreshToken(this);
+            this._isRefreshing = false;
+            this._refreshQueue.forEach(p => p.resolve());
+            this._refreshQueue = [];
+            return await this.requestAndResponse<M>(url, req, apiName, resultModelClass, saveCache);
+          } catch {
+            this._isRefreshing = false;
+            this._refreshQueue.forEach(p => p.reject(processedErr));
+            this._refreshQueue = [];
+            throw processedErr;
+          }
+        } else {
+          await new Promise<void>((resolve, reject) => {
+            this._refreshQueue.push({ resolve, reject });
+          });
+          return await this.requestAndResponse<M>(url, req, apiName, resultModelClass, saveCache);
+        }
+      }
+
+      throw processedErr;
     }
   }
 
