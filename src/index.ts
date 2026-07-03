@@ -27,6 +27,7 @@ export * from './events/EventListener';
 export * from './tools';
 export * from './request';
 export * from './FilePicker';
+export * from './datetime';
 
 export {
   ArrayUtils,

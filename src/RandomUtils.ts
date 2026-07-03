@@ -55,7 +55,7 @@ function genNonDuplicateIDHEX(randomLength: number): string {
   if (randomLength <= 0) randomLength = 8;
   
   const idStr = genNonDuplicateID(randomLength);
-  return StringConv.strToHexCharCode(idStr, false).substring(idStr.length - randomLength, randomLength);
+  return StringConv.strToHexCharCode(idStr, false).substring(0, randomLength);
 }
 
 /**
