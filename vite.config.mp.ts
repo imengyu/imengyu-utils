@@ -41,7 +41,7 @@ export default defineConfig({
       entry: path.resolve(__dirname, 'src/index.mp.ts'),
       formats: ['cjs'],
       name: 'imengyu-utils',
-      fileName: () => `index.mp.js`,
+      fileName: () => `index.js`,
     },
     rollupOptions: {
       external: ['vue', '@imengyu/js-request-transform', /^@babel\/runtime\//],
@@ -49,6 +49,8 @@ export default defineConfig({
         generatedCode: 'es5',
       },
     },
+    outDir: 'dist/mp',
+    emptyOutDir: true,
     minify: false,
     sourcemap: false
   }
