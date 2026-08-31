@@ -163,7 +163,7 @@ function isContainsNullOrEmpty(arr: Array<unknown>): boolean {
  * @param arr2 数组2
  * @returns 两个数组是否相等
  */
-function isEqual(arr1: Array<unknown>, arr2: Array<unknown>): boolean {
+function isEqual(arr1: Array<unknown>|null|undefined, arr2: Array<unknown>|null|undefined): boolean {
   if (!arr1 && !arr2) {
     return true;
   }

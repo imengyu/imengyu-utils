@@ -129,7 +129,7 @@ function formatBankCard(cardNumber: string, separator: string = ' ', groupSize: 
   
   if (!digits) return cardNumber;
   
-  const regex = new RegExp(`(\d{${groupSize}})`, 'g');
+  const regex = new RegExp(`(\\d{${groupSize}})`, 'g');
   const groups = digits.match(regex) || [];
   
   return groups.join(separator);

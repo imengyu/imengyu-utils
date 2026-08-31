@@ -52,12 +52,38 @@ export function appendPostParams(source: any, key: string, value: any) {
  * @returns 格式化后的错误信息
  */
 export function formatError(e: any) {
+  if (typeof e === 'string' || typeof e === 'number' || typeof e === 'boolean')
+    return e;
   if (e?.errMsg) 
     return e.errMsg;
   if (e instanceof RequestApiError) 
     return e.errorMessage + (e.errorCodeMessage ? ` (${e.errorCodeMessage})` : '');
   if (e instanceof Error) 
     return e.message;
-  else 
-    return '' + (e ?? '未知错误');
+  if (typeof e === 'object') 
+    return formatObject(e);
+  return '' + (e ?? '未知错误');
+}
+
+function formatObject(obj: any, indent = 0, seen = new WeakSet<object>()): string {
+  if (obj === null) return 'null';
+  if (obj === undefined) return 'undefined';
+  if (typeof obj !== 'object') return String(obj);
+  if (Array.isArray(obj)) {
+    if (seen.has(obj)) return '[Circular]';
+    seen.add(obj);
+    const items = obj.map(item => formatObject(item, indent + 1, seen));
+    if (items.length === 0) return '[]';
+    const pad = '  '.repeat(indent + 1);
+    const closePad = '  '.repeat(indent);
+    return `[\n${items.map(i => `${pad}${i}`).join(',\n')}\n${closePad}]`;
+  }
+  if (seen.has(obj)) return '[Circular]';
+  seen.add(obj);
+  const keys = Object.keys(obj);
+  if (keys.length === 0) return '{}';
+  const pad = '  '.repeat(indent + 1);
+  const closePad = '  '.repeat(indent);
+  const entries = keys.map(key => `${pad}${key}: ${formatObject(obj[key], indent + 1, seen)}`);
+  return `{\n${entries.join(',\n')}\n${closePad}}`;
 }

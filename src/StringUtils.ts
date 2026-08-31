@@ -40,9 +40,9 @@ const path = {
     if (i > 0) {
       const startPos = i + 9;
       let endPos = n.length;
-      for (let i = 0; i < n.length; i++) {
-        if (n[i] === ';') {
-          endPos = i;
+      for (let j = startPos; j < n.length; j++) {
+        if (n[j] === ';') {
+          endPos = j;
           break;
         }
       }
