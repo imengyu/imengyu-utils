@@ -1,4 +1,4 @@
-import { ArrayUtils } from "..";
+import ArrayUtils from "../ArrayUtils";
 
 /**
  * 简易浏览器端使用的 EventEmitter

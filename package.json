@@ -8,6 +8,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
+    "build:mp": "vite build --config vite.config.mp.ts",
     "dev": "vite",
     "test": "jest"
   },
@@ -22,6 +23,9 @@
   "author": "imengyu",
   "license": "MIT",
   "devDependencies": {
+    "@babel/core": "^7.29.7",
+    "@babel/plugin-transform-runtime": "^7.29.7",
+    "@babel/preset-env": "^7.29.7",
     "@dcloudio/types": "^3.4.19",
     "@dcloudio/uni-app": "^3.0.0-4030620241128001",
     "@uni-helper/uni-app-types": "^1.0.0-alpha.6",
@@ -30,9 +34,11 @@
     "tslib": "^2.6.0",
     "typescript": "^5.8.2",
     "vite": "^5.4.5",
+    "vite-plugin-babel": "^1.7.3",
     "vite-plugin-dts": "^4.2.1"
   },
   "dependencies": {
+    "@babel/runtime": "^8.0.0",
     "@imengyu/js-request-transform": "^0.4.0"
   }
 }
